@@ -26,9 +26,9 @@ namespace CC.SoundSystem.Editor
 
         [SerializeField] int m_selectedDomainIndex = 0;
 
-        string[] Domains => DomainEditorHandler.GetDomains();
+        string[] Domains => Domain.GetAll();
         string SelectedDomain => Domains[m_selectedDomainIndex];
-        Node[] Nodes => DomainEditorHandler.GetNodes(SelectedDomain);  
+        Node[] Nodes => Domain.GetNodes(SelectedDomain);  
 
         [MenuItem("Window/CC/Sound System/Draw Menu")]
         public static void CreateWindow()

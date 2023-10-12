@@ -6,9 +6,9 @@ using System;
 using CC.Core.Utilities.IO;
 using CC.Core.InputValidation;
 
-namespace CC.SoundSystem
+namespace CC.SoundSystem.Editor
 {
-    public static class DomainEditorHandler
+    public static class Domain
     {
         static readonly string path = Directory.GetParent(Directory.GetParent(FileLocation.Directory).FullName).FullName + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
@@ -17,7 +17,7 @@ namespace CC.SoundSystem
         /// Returns all the names of domains
         /// </summary>
         /// <returns>All Domain names</returns>
-        public static string[] GetDomains()
+        public static string[] GetAll()
         {
             string[] paths = Directory.GetDirectories(path);
             for (int i = 0; i < paths.Length; i++)
@@ -40,6 +40,33 @@ namespace CC.SoundSystem
             return nodes;
         }
 
+        /// <summary>
+        /// Returns the name of the domain the passed node is in
+        /// </summary>
+        /// <param name="node">Node to get domain of</param>
+        /// <returns>Domain name</returns>
+        public static string GetDomainOf(Node node)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(node);
+            string domain = Directory.GetParent(assetPath).FullName;
+            return Path.GetRelativePath(path, domain);
+        }
+
+        /// <summary>
+        /// Checks to see if the domain passed has only one node that has no parents / is a root
+        /// </summary>
+        /// <param name="domain">Domain to search</param>
+        /// <returns>if domain contains only one root</returns>
+        public static bool HasOneRoot(string domain)
+        {
+            int countOfRoots = 0;
+            Node[] nodes = GetNodes(domain);
+            for(int i = 0; i < nodes.Length; i++)
+            {
+                if (nodes[i].IsRoot) countOfRoots++;
+            }
+            return countOfRoots == 1;
+        }
 
         /// <summary>
         /// Create a node for each name passed in at a folder with fileName

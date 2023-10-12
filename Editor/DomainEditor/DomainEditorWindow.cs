@@ -19,7 +19,7 @@ namespace CC.SoundSystem.Editor
         //User GUI interface inputs
         [SerializeField] int m_domainToDeleteIndex;
 
-        string DomainToDelete => DomainEditorHandler.GetDomains()[m_domainToDeleteIndex];
+        string DomainToDelete => Domain.GetAll()[m_domainToDeleteIndex];
 
         [MenuItem("Window/CC/Sound System/Domain Editor")]
         public static void CreateWindow()
@@ -56,7 +56,7 @@ namespace CC.SoundSystem.Editor
             EditorGUILayout.PropertyField(m_serialized.FindProperty("m_domainName"));
             Core.Utilities.GUI.Layout.DisplayArray(m_serialized.FindProperty("m_nodeNames"));
 
-            if(GUILayout.Button("Create Domain")) { DomainEditorHandler.CreateNodes(m_domainName, m_nodeNames); ResetCreationValues(); ShowNotification(new("Domain Created Successfully!")); }
+            if(GUILayout.Button("Create Domain")) { Domain.CreateNodes(m_domainName, m_nodeNames); ResetCreationValues(); ShowNotification(new("Domain Created Successfully!")); }
         }
 
         protected void DrawDeletionWidget()
@@ -65,10 +65,10 @@ namespace CC.SoundSystem.Editor
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Domain to Delete");
-            m_domainToDeleteIndex = EditorGUILayout.Popup(m_domainToDeleteIndex, DomainEditorHandler.GetDomains());
+            m_domainToDeleteIndex = EditorGUILayout.Popup(m_domainToDeleteIndex, Domain.GetAll());
             EditorGUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Delete Domain")) { DomainEditorHandler.DeleteDomain(DomainToDelete); ShowNotification(new("Domain Deleted Successfully!")); }
+            if (GUILayout.Button("Delete Domain")) { Domain.DeleteDomain(DomainToDelete); ShowNotification(new("Domain Deleted Successfully!")); }
         }
 
         protected void ResetCreationValues()

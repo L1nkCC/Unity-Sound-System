@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 
 
-namespace CC.SoundSystem
+namespace CC.SoundSystem.Editor
 {
     [CustomEditor(typeof(Node))]
     [CanEditMultipleObjects]
@@ -41,7 +41,7 @@ namespace CC.SoundSystem
             //Clip Details
             CC.Core.Utilities.GUI.Layout.DisplayArray(m_clips);
 
-            DrawHelpBoxes();
+            DrawWarnings();
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -62,6 +62,7 @@ namespace CC.SoundSystem
         private void DrawRelationships()
         {
             EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.LabelField( "Domain : " + Domain.GetDomainOf(serializedObject.targetObject as Node), EditorStyles.largeLabel);
             EditorGUILayout.PropertyField(m_parent);
             EditorGUI.EndDisabledGroup();
 
@@ -106,12 +107,21 @@ namespace CC.SoundSystem
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
         #endregion
-        private void DrawHelpBoxes()
+        private void DrawWarnings()
         {
+            if(m_children.arraySize == 0 && (serializedObject.targetObject as Node).IsRoot)
+            {
+                EditorGUILayout.HelpBox(new("This node is a root a leaf!"), MessageType.Warning);
+            }
             if(m_children.arraySize == 0 && m_clips.arraySize == 0)
             {
                 EditorGUILayout.HelpBox(new("This node has no clips to play and is a leaf!"), MessageType.Warning);
             }
+            if(!Domain.HasOneRoot(Domain.GetDomainOf(serializedObject.targetObject as Node)))
+            {
+                EditorGUILayout.HelpBox(new("This domain has no well defined root!"), MessageType.Error);
+            }
+            
         }
     }
 

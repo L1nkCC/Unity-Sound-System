@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 namespace CC.SoundSystem.Editor
 {
-    public class NodeEditorView : EditorWindow
+    public class NodeEditorWindow : EditorWindow
     {
         SerializedObject m_serialized;
 
@@ -14,8 +14,8 @@ namespace CC.SoundSystem.Editor
 
         //User GUI interface inputs
         [SerializeField] int m_domainSelectedIndex;
-        string DomainSelected => DomainEditorHandler.GetDomains()[m_domainSelectedIndex];
-        Node[] DomainSelectedNodes =>  DomainEditorHandler.GetNodes(DomainSelected);
+        string DomainSelected => Domain.GetAll()[m_domainSelectedIndex];
+        Node[] DomainSelectedNodes =>  Domain.GetNodes(DomainSelected);
         string[] DomainSelectedNodesNames 
         { 
             get{
@@ -40,7 +40,7 @@ namespace CC.SoundSystem.Editor
         [MenuItem("Window/CC/Sound System/Node Editor")]
         public static void CreateWindow()
         {
-            GetWindow<NodeEditorView>();
+            GetWindow<NodeEditorWindow>();
         }
 
         protected void OnEnable()
@@ -55,7 +55,7 @@ namespace CC.SoundSystem.Editor
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Select Domain");
-            m_domainSelectedIndex = EditorGUILayout.Popup(m_domainSelectedIndex, DomainEditorHandler.GetDomains());
+            m_domainSelectedIndex = EditorGUILayout.Popup(m_domainSelectedIndex, Domain.GetAll());
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
