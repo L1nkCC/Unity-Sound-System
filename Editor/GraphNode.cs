@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using UnityEditor;
-
-namespace CC.SoundSystem
+using CC.Core.Utilities.IO;
+namespace CC.SoundSystem.Editor
 {
     public class GraphNode : UnityEditor.Experimental.GraphView.Node
     {
@@ -25,9 +25,9 @@ namespace CC.SoundSystem
             Node = node;
             title = Node.name;
 
-
             ParentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
             ParentPort.portName = "Parent";
+            ParentPort.AddManipulator(new EdgeConnector<Edge>(new RelationalEdgeConnectorListener()));
             inputContainer.Add(ParentPort);
             
             ChildrenPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
@@ -37,6 +37,7 @@ namespace CC.SoundSystem
             var nodeDetails = new IMGUIContainer(UnityEditor.Editor.CreateEditor(Node).OnInspectorGUI);
             extensionContainer.Add(nodeDetails);
 
+            RefreshExpandedState();
         }
 
 
@@ -63,6 +64,8 @@ namespace CC.SoundSystem
         }
 
 
+
+
         /// <summary>
         /// Check to see if Node has any port connection to passed port. No port of a node connects to another
         /// NOTE: Only checks between relational port connections defined in GraphNode. Will not reflect any child class port connections
@@ -87,6 +90,35 @@ namespace CC.SoundSystem
                 if (edge.output == parameterNode.ChildrenPort) return true;
             }
             return false;
+        }
+
+
+        private class RelationalEdgeConnectorListener : IEdgeConnectorListener
+        {
+            public void OnDrop(GraphView graphView, Edge edge)
+            {
+                (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
+            }
+
+            public void OnDropOutsidePort(Edge edge, Vector2 position)
+            {
+
+            }
+        }
+
+
+        /// <summary>
+        /// Provides the compile time location of this File so that stylesheet may be found.
+        /// </summary>
+        /// Helpful Link : https://stackoverflow.com/questions/47841441/how-do-i-get-the-path-to-the-current-c-sharp-source-code-file
+        private static class FileLocation
+        {
+            public static string Path => GetThisFilePath().Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
+            public static string Directory => System.IO.Path.GetDirectoryName(GetThisFilePath()).Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
+            private static string GetThisFilePath([System.Runtime.CompilerServices.CallerFilePath] string path = null)
+            {
+                return path;
+            }
         }
     }
 }

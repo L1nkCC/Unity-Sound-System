@@ -22,18 +22,7 @@ namespace CC.SoundSystem.Editor
 
         //Nodes in Selected Domain
         Node[] DomainSelectedNodes =>  Domain.GetNodes(DomainSelected);
-        string[] DomainSelectedNodesNames 
-        { 
-            get{
-                Node[] nodes = DomainSelectedNodes;
-                string[] nodeNames = new string[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    nodeNames[i] = nodes[i].name;
-                }
-                return nodeNames;
-            }
-        }
+        string[] DomainSelectedNodesNames => Domain.GetNodeNames(DomainSelected);
 
 
 

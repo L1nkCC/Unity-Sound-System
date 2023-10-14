@@ -2,9 +2,7 @@
     "name": "CC.SoundSystem",
     "rootNamespace": "CC.SoundSystem",
     "references": [
-        "GUID:71e5befdef843394e8e8af39afeb422c",
-        "GUID:dc11b097472aebc44ac5f1081798a0c1",
-        "GUID:5c8b5d0bc4e017241869adc38f2fb96a"
+        "GUID:71e5befdef843394e8e8af39afeb422c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

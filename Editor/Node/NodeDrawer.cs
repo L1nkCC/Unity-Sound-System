@@ -96,12 +96,13 @@ namespace CC.SoundSystem.Editor
             {
                 EditorGUI.BeginDisabledGroup(true);
 
-                if(m_children.arraySize == 0){ EditorGUILayout.HelpBox(new("This is a leaf node")); }
+                if (m_children.arraySize == 0) { EditorGUILayout.HelpBox(new("This is a leaf node")); }
 
                 for (int i = 0; i < m_children.arraySize; i++)
                 {
-                    EditorGUILayout.LabelField(m_children.GetArrayElementAtIndex(i).exposedReferenceValue.name);
+                    EditorGUILayout.LabelField((m_children.GetArrayElementAtIndex(i).objectReferenceValue as Node).name);
                 }
+                
                 EditorGUI.EndDisabledGroup();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();

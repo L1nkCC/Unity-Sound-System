@@ -26,23 +26,28 @@ namespace CC.SoundSystem.Editor
         DomainEditorWindow m_domainWindowSerialized;
 
 
+        ListView NodeValues;
+        DropdownField DomainSelector; 
+
         [SerializeField] int m_selectedDomainIndex = 0;
 
         string[] Domains => Domain.GetAll();
         string SelectedDomain => Domains[m_selectedDomainIndex];
         Node[] Nodes => Domain.GetNodes(SelectedDomain);  
 
-     
+        [MenuItem("Window/CC/Sound System/GraphView")]
         public static void CreateWindow()
         {
             GetWindow<SoundSystemEditorWindow>();
+
         }
         private void OnEnable()
         {
             titleContent = new("Sound System");
             m_serialized = new SerializedObject(this);
             m_domainWindowSerialized = CreateInstance<DomainEditorWindow>();
-
+            NodeValues = new ListView();
+            DomainSelector = new DropdownField(Domains.ToList(), 0);
         }
 
         public void CreateGUI()
@@ -51,16 +56,12 @@ namespace CC.SoundSystem.Editor
             var leftPane = new VisualElement();
             var rightPane = new VisualElement();
 
-
-            var domainSelection = new DropdownField("Domains : ", Domains.ToList(), 0);
-            var NodeValues = new ListView(Nodes);
-/*            NodeValues.makeItem = () => new ();
-            NodeValues.bindItem = (item, index) => { (item as Label).text = Nodes[index].name; };
-            NodeValues.itemsSource = Nodes;*/
-
-
             var attempt = new NodeConnectorView();
 
+
+            m_selectedDomainIndex = DomainSelector.index;
+            NodeValues.itemsSource = Domain.GetNodeNames(SelectedDomain);
+            NodeValues.Rebuild();
             //var attempt2 = new GraphElement();
 
             //attempt.AddElement();
@@ -75,17 +76,17 @@ namespace CC.SoundSystem.Editor
             //var propertyV = new ListView(tree);
 
             rootVisualElement.Add(splitView);
-            leftPane.Add(domainSelection);
+            leftPane.Add(DomainSelector);
             leftPane.Add(NodeValues);
             splitView.Add(leftPane);
             rightPane.Add(attempt);
             splitView.Add(rightPane);
-
-
-
-           
         }
-
+        private void OnGUI()
+        {
+            
+            m_serialized.ApplyModifiedProperties();
+        }
 
     }
 }

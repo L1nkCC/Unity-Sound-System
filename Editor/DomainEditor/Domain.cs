@@ -10,7 +10,7 @@ namespace CC.SoundSystem.Editor
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/12/2023
+    /// Last Edited: 10/14/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
@@ -20,6 +20,7 @@ namespace CC.SoundSystem.Editor
         static readonly string path = Directory.GetParent(Directory.GetParent(FileLocation.Directory).FullName).FullName + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
 
+        #region Getters
         /// <summary>
         /// Returns all the names of domains
         /// </summary>
@@ -48,6 +49,22 @@ namespace CC.SoundSystem.Editor
         }
 
         /// <summary>
+        /// Get the names of every Node in the Domain
+        /// </summary>
+        /// <param name="domainName">The domain to get nodes from</param>
+        /// <returns>Array of node names in domain</returns>
+        public static string[] GetNodeNames(string domainName)
+        {
+            string[] nodePaths = Directory.GetFiles(path + domainName, "*" + EXT, SearchOption.TopDirectoryOnly);
+            string[] nodeNames = new string[nodePaths.Length];
+            for(int i= 0; i < nodePaths.Length; i++)
+            {
+                nodeNames[i] = Path.GetRelativePath(path + domainName, nodePaths[i]);
+            }
+            return nodeNames;
+        }
+
+        /// <summary>
         /// Returns the name of the domain the passed node is in
         /// </summary>
         /// <param name="node">Node to get domain of</param>
@@ -58,7 +75,8 @@ namespace CC.SoundSystem.Editor
             string domain = Directory.GetParent(assetPath).FullName;
             return Path.GetRelativePath(path, domain);
         }
-
+        #endregion
+        #region Status
         /// <summary>
         /// Checks to see if the domain passed has only one node that has no parents / is a root
         /// </summary>
@@ -74,13 +92,14 @@ namespace CC.SoundSystem.Editor
             }
             return countOfRoots == 1;
         }
-
+        #endregion
+        #region Adding Nodes
         /// <summary>
         /// Create a node for each name passed in at a folder with fileName
         /// </summary>
         /// <param name="domainName">Folder Node scriptable objects will be saved</param>
         /// <param name="nodeNames">Names of Nodes to be created</param>
-        public static void CreateNodes(string domainName, string[] nodeNames)
+        public static void CreateDomain(string domainName, string[] nodeNames)
         {
             ValidateInputs(domainName, nodeNames);
             Directory.CreateDirectory(path + domainName);
@@ -88,11 +107,24 @@ namespace CC.SoundSystem.Editor
             foreach (string nodeName in nodeNames)
             {
                 Node node = Node.CreateInstance(nodeName);
-                string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + nodeName + EXT;
-                AssetDatabase.CreateAsset(node, nodeSavePath.GetRelativeUnityPath());
+                AddNode(domainName, node);
             }
+        }
+        /// <summary>
+        /// Saves and adds a node to the domain specified, saving it to the domain's folder
+        /// NOTE: Will throw a DomainUniqueNamingException() if the passed node shares a name with a node already in the domain
+        /// </summary>
+        /// <param name="domainName">The domain the node will be added</param>
+        /// <param name="node">The node to be saved</param>
+        public static void AddNode(string domainName, Node node)
+        {
+            if (GetNodeNames(domainName).Contains(node.name)) throw new DomainUniqueNamingException("Domain "+ domainName + " already has a node named " + node.name + ". Please Enter a unqiuely named node for this domain");
+            string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
+            AssetDatabase.CreateAsset(node, nodeSavePath.GetRelativeUnityPath());
             AssetDatabase.SaveAssets();
         }
+        #endregion
+        #region Delete Domain
         /// <summary>
         /// Delete Domain by name
         /// </summary>
@@ -101,8 +133,9 @@ namespace CC.SoundSystem.Editor
         {
             AssetDatabase.DeleteAsset((path+domainName).GetRelativeUnityPath());
         }
+        #endregion
 
-
+        #region Utilities
         /// <summary>
         /// Validate Inputs For IO operations
         /// </summary>
@@ -110,11 +143,27 @@ namespace CC.SoundSystem.Editor
         /// <param name="nodeNames"></param>
         private static void ValidateInputs(string domainNames, string[] nodeNames)
         {
-            if (Directory.Exists(path + domainNames)) throw new System.IO.IOException("Domain Already Exists. Please Enter another name for the domain");
-            if (nodeNames.Distinct().Count() != nodeNames.Length) throw new ArgumentException("Node Names are not distinct. Please Enter names that are unique");
+            if (Directory.Exists(path + domainNames)) throw new DomainUniqueNamingException("Domain Already Exists. Please Enter another name for the domain");
+            if (nodeNames.Distinct().Count() != nodeNames.Length) throw new DomainUniqueNamingException("Node Names are not distinct. Please Enter names that are unique");
             nodeNames.ValidateInput();
             domainNames.ValidateInput();
         }
+
+
+        /// <summary>
+        /// Exception regarding naming conflictions within Domains or with Domains
+        /// </summary>
+        [Serializable]
+        public class DomainUniqueNamingException : Exception
+        {
+            public DomainUniqueNamingException() { }
+            public DomainUniqueNamingException(string message) : base(message) { }
+            public DomainUniqueNamingException(string message, Exception inner) : base(message, inner) { }
+            protected DomainUniqueNamingException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        }
+
 
         /// <summary>
         /// Provides the compile time location of this File so that a reference may be used to save the Enum files
@@ -129,5 +178,6 @@ namespace CC.SoundSystem.Editor
                 return path;
             }
         }
+        #endregion
     }
 }

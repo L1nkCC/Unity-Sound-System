@@ -77,7 +77,7 @@ namespace CC.SoundSystem.Editor
             EditorGUILayout.PropertyField(m_serialized.FindProperty("m_domainName"));
             Core.Utilities.GUI.Layout.DisplayArray(m_serialized.FindProperty("m_nodeNames"));
 
-            if(GUILayout.Button("Create Domain")) { Domain.CreateNodes(m_domainName, m_nodeNames); ResetCreationValues(); ShowNotification(new("Domain Created Successfully!")); }
+            if(GUILayout.Button("Create Domain")) { Domain.CreateDomain(m_domainName, m_nodeNames); ResetCreationValues(); ShowNotification(new("Domain Created Successfully!")); }
         }
 
         /// <summary>

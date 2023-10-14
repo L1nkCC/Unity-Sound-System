@@ -15,16 +15,6 @@ namespace CC.SoundSystem.Editor
         public new class UxmlFactory : UxmlFactory<NodeConnectorView, UxmlTraits> { }
 
         /// <summary>
-        /// Allow for creation through Unity Toolbar
-        /// </summary>
-        [MenuItem("Window/CC/Sound System/Graph View")]
-        public static void CreateView()
-        {
-            EditorWindow wnd = EditorWindow.GetWindow<EditorWindow>();
-            wnd.rootVisualElement.Add(new NodeConnectorView());
-        }
-
-        /// <summary>
         /// Contructor
         /// </summary>
         public NodeConnectorView() : base()

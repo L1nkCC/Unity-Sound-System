@@ -9,7 +9,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/13/2023
+    /// Last Edited: 10/14/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -115,9 +115,9 @@ namespace CC.SoundSystem
 
 
         /// <summary>
-        /// Gets all types that exist in the tree that this node is currently in.
+        /// Gets all node names that exist in the tree that this node is currently in.
         /// </summary>
-        /// <returns> All types in tree.</returns>
+        /// <returns> All node names in tree.</returns>
         private HashSet<string> GetTreeNodeNames()
         {
             return GetRoot().GetChildNodeNames();

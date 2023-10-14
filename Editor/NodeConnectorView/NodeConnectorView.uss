@@ -4,3 +4,8 @@ GridBackground {
 	--thick-line-color: #191919;
 	--spacing: 30;
 }
+GraphNode
+{
+	opacity: 1;
+	background-color: #212121;
+}
