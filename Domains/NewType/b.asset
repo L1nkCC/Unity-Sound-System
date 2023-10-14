@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9625fb266bfec1489f80fddecc04b2a, type: 3}
   m_Name: b
   m_EditorClassIdentifier: 
-  m_name: Renamed
   m_parent: {fileID: 11400000, guid: fe45092ff7302c94a826262b059b8f11, type: 2}
-  m_multiplier: 1
+  m_children: []
+  m_clips: []
+  m_multiplier: 0.787
   m_muted: 0

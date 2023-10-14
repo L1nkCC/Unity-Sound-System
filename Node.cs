@@ -7,19 +7,28 @@ using UnityEngine;
 namespace CC.SoundSystem
 {
 
+    /// Author: L1nkCC
+    /// Created: 10/13/2023
+    /// Last Edited: 10/13/2023
+    /// <summary>
+    /// Holds information for each sound designation for easy manipulation by game developers
+    /// </summary>
     [System.Serializable]
     public class Node : ScriptableObject
     {
+        //bounds on m_multiplier's value
         public const float MAX_MULTIPLIER = 1;
         public const float MIN_MULTIPLIER = 0;
 
-
+        //Node Relationships
         [SerializeField] private Node m_parent;
         [SerializeField] private List<Node> m_children = new();
+        //Node Content
         [SerializeField] private List<AudioClip> m_clips = new();
         [SerializeField] private float m_multiplier = 1;//should stay between 0:1
         [SerializeField] private bool m_muted = false;
 
+        //Public accessors
         public Node Parent => m_parent;
         public bool IsRoot => m_parent == null;
 
@@ -50,7 +59,10 @@ namespace CC.SoundSystem
             }
             return parent;
         }
-
+        /// <summary>
+        /// Get all nodes that give a path back to the root
+        /// </summary>
+        /// <returns>Path of nodes to Root from this node</returns>
         public List<Node> GetRootPath()
         {
             List<Node> rootPath = new();

@@ -5,23 +5,6 @@ using UnityEngine.UIElements;
 /*
 namespace CC.SoundSystem
 {
-    public enum TestSounds
-    {
-        master,
-        music,
-        UI,
-        game,
-    }
-
-    public class EditorNode<T> : Node<T> where T : System.Enum
-    {
-        public Rect m_rect;
-
-        public EditorNode([Optional] string name, T type, Node<T> parent, Rect rect) : base(name, type, parent)
-        {
-            m_rect = rect;
-        }
-    }
 
     public class SoundTreeEditorWindow : EditorWindow//, IHasCustomMenu
     {

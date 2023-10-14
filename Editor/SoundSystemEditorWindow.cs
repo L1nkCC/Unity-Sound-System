@@ -5,6 +5,9 @@ using UnityEngine;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine.UIElements;
+using UnityEditor.Experimental.GraphView;
+using System.IO;
+using CC.Core.Utilities.IO;
 /// <summary>
 /// Helpful links
 /// https://stackoverflow.com/questions/17593101/how-to-write-a-gui-editor-for-graph-or-tree-structures
@@ -19,7 +22,6 @@ namespace CC.SoundSystem.Editor
     public class SoundSystemEditorWindow : EditorWindow
     {
 
-        string m_enumNamespace = CC.Enum.Editor.EnumEditorHandler.STANDARD_NAMESPACE;
         SerializedObject m_serialized;
         DomainEditorWindow m_domainWindowSerialized;
 
@@ -30,7 +32,7 @@ namespace CC.SoundSystem.Editor
         string SelectedDomain => Domains[m_selectedDomainIndex];
         Node[] Nodes => Domain.GetNodes(SelectedDomain);  
 
-        [MenuItem("Window/CC/Sound System/Draw Menu")]
+     
         public static void CreateWindow()
         {
             GetWindow<SoundSystemEditorWindow>();
@@ -40,6 +42,7 @@ namespace CC.SoundSystem.Editor
             titleContent = new("Sound System");
             m_serialized = new SerializedObject(this);
             m_domainWindowSerialized = CreateInstance<DomainEditorWindow>();
+
         }
 
         public void CreateGUI()
@@ -51,18 +54,24 @@ namespace CC.SoundSystem.Editor
 
             var domainSelection = new DropdownField("Domains : ", Domains.ToList(), 0);
             var NodeValues = new ListView(Nodes);
-            NodeValues.makeItem = () => new ();
+/*            NodeValues.makeItem = () => new ();
             NodeValues.bindItem = (item, index) => { (item as Label).text = Nodes[index].name; };
-            NodeValues.itemsSource = Nodes;
+            NodeValues.itemsSource = Nodes;*/
 
 
-            var attempt = new IMGUIContainer(m_domainWindowSerialized.OnGUI);
+            var attempt = new NodeConnectorView();
+
+            //var attempt2 = new GraphElement();
+
+            //attempt.AddElement();
+            //new IMGUIContainer(m_domainWindowSerialized.OnGUI);
+
 
             /*typeof(Utilities.SoundTree<>).GetType().MakeGenericType(new System.Type[] { SelectedEnum });
             var tree = typeof(Utilities.SoundTree<>).GetConstructor(new System.Type[] { SelectedEnum }).Invoke(new string[0]);
 
             throw new System.Exception("tree + " + tree.ToString());*/
-            
+
             //var propertyV = new ListView(tree);
 
             rootVisualElement.Add(splitView);
@@ -77,10 +86,6 @@ namespace CC.SoundSystem.Editor
            
         }
 
-        public System.Type[] LoadEnums()
-        {
-            var asm = Assembly.GetAssembly(typeof(CC.Enum.Editor.EnumEditorHandler));
-            return asm.GetTypes().Where(type => type.IsEnum && type.Namespace.Equals(m_enumNamespace)).ToArray();
-        }
+
     }
 }
