@@ -6,6 +6,15 @@ using UnityEditor;
 
 namespace CC.SoundSystem.Editor
 {
+    /// Author: L1nkCC
+    /// Created: 10/14/2023
+    /// Last Edited: 10/14/2023
+    /// 
+    /// <summary>
+    /// Custom Drawer for the CC.SoundSystem.Node
+    /// Shows Relationships as read-only
+    /// Shows VolumeDetails and AudioClips as editable
+    /// </summary>
     [CustomEditor(typeof(Node))]
     [CanEditMultipleObjects]
     public class NodeDrawer : UnityEditor.Editor
@@ -22,7 +31,9 @@ namespace CC.SoundSystem.Editor
         bool m_rootPathFolderStatus = false;
         bool m_childrenFolderStatus = false;
 
-
+        /// <summary>
+        /// Intialize serialized refrences
+        /// </summary>
         private void OnEnable()
         {
             m_parent = serializedObject.FindProperty("m_parent");
@@ -32,6 +43,9 @@ namespace CC.SoundSystem.Editor
             m_muted = serializedObject.FindProperty("m_muted");
         }
 
+        /// <summary>
+        /// Handle Frame Events
+        /// </summary>
         public override void OnInspectorGUI()
         {
             DrawRelationships();
@@ -42,10 +56,13 @@ namespace CC.SoundSystem.Editor
             CC.Core.Utilities.GUI.Layout.DisplayArray(m_clips);
 
             DrawWarnings();
-
+            
             serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
         }
-
+        /// <summary>
+        /// Draw the values of Volume to the drawer
+        /// </summary>
         private void DrawVolumeDetails()
         {
             EditorGUILayout.BeginHorizontal();
@@ -58,7 +75,9 @@ namespace CC.SoundSystem.Editor
             EditorGUI.ProgressBar(GUILayoutUtility.GetRect(18, 18, "TextField"), (serializedObject.targetObject as Node).GetVolume(), "Volume");
         }
 
-
+        /// <summary>
+        /// Draw Relationship Details
+        /// </summary>
         private void DrawRelationships()
         {
             EditorGUI.BeginDisabledGroup(true);
@@ -71,6 +90,9 @@ namespace CC.SoundSystem.Editor
         }
 
         #region Relationship Display support
+        /// <summary>
+        /// Display a Foldout of the path to the root
+        /// </summary>
         private void DrawRootPath()
         {
             m_rootPathFolderStatus = EditorGUILayout.BeginFoldoutHeaderGroup(m_rootPathFolderStatus, "Root Path");
@@ -88,7 +110,9 @@ namespace CC.SoundSystem.Editor
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
-
+        /// <summary>
+        /// Display a Flodout of all children
+        /// </summary>
         private void DrawChildren()
         {
             m_childrenFolderStatus = EditorGUILayout.BeginFoldoutHeaderGroup(m_childrenFolderStatus, "Children");
@@ -108,6 +132,9 @@ namespace CC.SoundSystem.Editor
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
         #endregion
+        /// <summary>
+        /// Check for warnings and display them
+        /// </summary>
         private void DrawWarnings()
         {
             if(m_children.arraySize == 0 && (serializedObject.targetObject as Node).IsRoot)
@@ -123,6 +150,12 @@ namespace CC.SoundSystem.Editor
                 EditorGUILayout.HelpBox(new("This domain has no well defined root!"), MessageType.Error);
             }
             
+        }
+
+        //assure that windows will share same values
+        public override bool RequiresConstantRepaint()
+        {
+            return true;
         }
     }
 
