@@ -78,7 +78,29 @@ namespace CC.SoundSystem.Editor
             {
                 AddElement(nodes[i]);
             }
+            LoadConnections(nodes);
             
+        }
+        /// <summary>
+        /// Will load the connections of the nodes wrapped by Graph node to the Graph View
+        /// </summary>
+        /// <param name="nodes">Nodes to Load port connects of</param>
+        private void LoadConnections(GraphNode[] nodes)
+        {
+            //Load Connections
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                if (nodes[i].Node.IsRoot) continue;
+                for (int j = 0; j < nodes.Length; j++)
+                {
+                    if (nodes[i].Node.Parent == nodes[j].Node)
+                    {
+                        Edge edge = nodes[i].ParentPort.ConnectTo(nodes[j].ChildrenPort);
+                        AddElement(edge);
+                        continue;
+                    }
+                }
+            }
         }
 
 

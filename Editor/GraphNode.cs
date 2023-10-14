@@ -9,11 +9,11 @@ namespace CC.SoundSystem
 {
     public class GraphNode : UnityEditor.Experimental.GraphView.Node
     {
-        Node _node;
+        public Node Node { get; protected set; }
 
         //Ports  --  Relational
-        Port parentPort;
-        Port childrenPort;
+        public Port ParentPort { get; protected set; }
+        public Port ChildrenPort { get; protected set; }
 
 
         /// <summary>
@@ -22,19 +22,19 @@ namespace CC.SoundSystem
         /// <param name="node"></param>
         public GraphNode(Node node) : base()
         {
-            _node = node;
-            title = _node.name;
+            Node = node;
+            title = Node.name;
 
 
-            parentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
-            parentPort.portName = "Parent";
-            inputContainer.Add(parentPort);
+            ParentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
+            ParentPort.portName = "Parent";
+            inputContainer.Add(ParentPort);
             
-            childrenPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
-            childrenPort.portName = "Children";
-            outputContainer.Add(childrenPort);
+            ChildrenPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
+            ChildrenPort.portName = "Children";
+            outputContainer.Add(ChildrenPort);
             
-            var nodeDetails = new IMGUIContainer(UnityEditor.Editor.CreateEditor(_node).OnInspectorGUI);
+            var nodeDetails = new IMGUIContainer(UnityEditor.Editor.CreateEditor(Node).OnInspectorGUI);
             extensionContainer.Add(nodeDetails);
 
         }
@@ -48,13 +48,20 @@ namespace CC.SoundSystem
         /// <returns>Array containing all nodes wrapped in a GraphNode. Will be parallel to passed array.</returns>
         public static GraphNode[] Load(Node[] nodes)
         {
+            //Create GraphNodes
             GraphNode[] graphNodes = new GraphNode[nodes.Length];
             for(int i= 0; i < nodes.Length; i++)
             {
                 graphNodes[i] = new GraphNode(nodes[i]);
+                //Place GraphNodes
+                Rect pos = new Rect(graphNodes[i].GetPosition());
+                pos.x += 400 * (i % 10);
+                pos.y += 400 * (i / 10);
+                graphNodes[i].SetPosition(pos);
             }
             return graphNodes;
         }
+
 
         /// <summary>
         /// Check to see if Node has any port connection to passed port. No port of a node connects to another
@@ -65,19 +72,19 @@ namespace CC.SoundSystem
         public bool AnyPortConnectionTo(GraphNode parameterNode)
         {
             if (this == parameterNode) return true;
-            foreach(Edge edge in childrenPort.connections)
+            foreach(Edge edge in ChildrenPort.connections)
             {
-                if (edge.input == parameterNode.parentPort) return true;
-                if (edge.output == parameterNode.parentPort) return true;
-                if (edge.input == parameterNode.childrenPort) return true;
-                if (edge.output == parameterNode.childrenPort) return true;
+                if (edge.input == parameterNode.ParentPort) return true;
+                if (edge.output == parameterNode.ParentPort) return true;
+                if (edge.input == parameterNode.ChildrenPort) return true;
+                if (edge.output == parameterNode.ChildrenPort) return true;
             }
-            foreach(Edge edge in parentPort.connections)
+            foreach(Edge edge in ParentPort.connections)
             {
-                if (edge.input == parameterNode.parentPort) return true;
-                if (edge.output == parameterNode.parentPort) return true;
-                if (edge.input == parameterNode.childrenPort) return true;
-                if (edge.output == parameterNode.childrenPort) return true;
+                if (edge.input == parameterNode.ParentPort) return true;
+                if (edge.output == parameterNode.ParentPort) return true;
+                if (edge.input == parameterNode.ChildrenPort) return true;
+                if (edge.output == parameterNode.ChildrenPort) return true;
             }
             return false;
         }

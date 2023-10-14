@@ -128,13 +128,14 @@ namespace CC.SoundSystem
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private bool AddChild(Node node)
+        public bool AddChild(Node node)
         {
             HashSet<string> typesUsed = GetTreeNodeNames();
             if (!typesUsed.Contains(node.name))
             {
                 typesUsed.Add(node.name);
                 m_children.Add(node);
+                node.m_parent = this;
                 return true;
             }
             return false;
