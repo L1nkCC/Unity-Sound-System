@@ -28,7 +28,6 @@ namespace CC.SoundSystem.Editor
 
             ParentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
             ParentPort.portName = "Parent";
-            //ParentPort.AddManipulator(new RelationalEdgeConnector());
             ParentPort.OnConnect += AddChild;
             ParentPort.OnDisconnect += RemoveChild;
             inputContainer.Add(ParentPort);
@@ -51,18 +50,15 @@ namespace CC.SoundSystem.Editor
 
         private static void AddChild(UnityEditor.Experimental.GraphView.Port port)
         {
-            if (port.connections.ToArray().Length != 1) throw new System.ArgumentException("Port connections do not match requirements");
-            foreach(Edge edge in port.connections)
-            {
-                (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
-            }
+            if (port.capacity != UnityEditor.Experimental.GraphView.Port.Capacity.Single) throw new System.ArgumentException("Port must have Single Capacity to add Children");
+            Edge edge = port.connections.First();
+            (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
         }
         private static void RemoveChild(UnityEditor.Experimental.GraphView.Port port)
         {
-            if (port.connections.ToArray().Length != 1) throw new System.ArgumentException("Port connections do not match requirements");
-            foreach (Edge edge in port.connections)
+            if(!(port.node as GraphNode).Node.Parent.RemoveChild((port.node as GraphNode).Node))
             {
-                (edge.output.node as GraphNode).Node.RemoveChild((edge.input.node as GraphNode).Node);
+                Debug.Log("Remove Failed");
             }
         }
 
