@@ -41,9 +41,9 @@ namespace CC.SoundSystem.Editor
         /// <param name="startPort"></param>
         /// <param name="nodeAdapter"></param>
         /// <returns></returns>
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        public override List<UnityEditor.Experimental.GraphView.Port> GetCompatiblePorts(UnityEditor.Experimental.GraphView.Port startPort, NodeAdapter nodeAdapter)
         {
-            List<Port> compatiblePorts = new List<Port>();
+            List<UnityEditor.Experimental.GraphView.Port> compatiblePorts = new List<UnityEditor.Experimental.GraphView.Port>();
 
             ports.ForEach(port => 
             {

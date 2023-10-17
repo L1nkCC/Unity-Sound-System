@@ -56,6 +56,7 @@ namespace CC.SoundSystem.Editor
             CC.Core.Utilities.GUI.Layout.DisplayArray(m_clips);
 
             DrawWarnings();
+            DrawErrors();
             
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
@@ -145,11 +146,18 @@ namespace CC.SoundSystem.Editor
             {
                 EditorGUILayout.HelpBox(new("This node has no clips to play and is a leaf!"), MessageType.Warning);
             }
-            if(!Domain.HasOneRoot(Domain.GetDomainOf(serializedObject.targetObject as Node)))
+            
+            
+        }
+        /// <summary>
+        /// Check for Errors and display them
+        /// </summary>
+        private void DrawErrors()
+        {
+            if (!Domain.HasOneRoot(Domain.GetDomainOf(serializedObject.targetObject as Node)))
             {
                 EditorGUILayout.HelpBox(new("This domain has no well defined root!"), MessageType.Error);
             }
-            
         }
 
         //assure that windows will share same values

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using System.Linq;
 using UnityEditor;
 using CC.Core.Utilities.IO;
 namespace CC.SoundSystem.Editor
@@ -27,7 +28,9 @@ namespace CC.SoundSystem.Editor
 
             ParentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
             ParentPort.portName = "Parent";
-            ParentPort.AddManipulator(new EdgeConnector<Edge>(new RelationalEdgeConnectorListener()));
+            //ParentPort.AddManipulator(new RelationalEdgeConnector());
+            ParentPort.OnConnect += AddChild;
+            ParentPort.OnDisconnect += RemoveChild;
             inputContainer.Add(ParentPort);
             
             ChildrenPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
@@ -37,7 +40,30 @@ namespace CC.SoundSystem.Editor
             var nodeDetails = new IMGUIContainer(UnityEditor.Editor.CreateEditor(Node).OnInspectorGUI);
             extensionContainer.Add(nodeDetails);
 
+
             RefreshExpandedState();
+        }
+
+        public new virtual Port InstantiatePort(Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type)
+        {
+            return Port.Create<Edge>(orientation, direction, capacity, type);
+        }
+
+        private static void AddChild(UnityEditor.Experimental.GraphView.Port port)
+        {
+            if (port.connections.ToArray().Length != 1) throw new System.ArgumentException("Port connections do not match requirements");
+            foreach(Edge edge in port.connections)
+            {
+                (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
+            }
+        }
+        private static void RemoveChild(UnityEditor.Experimental.GraphView.Port port)
+        {
+            if (port.connections.ToArray().Length != 1) throw new System.ArgumentException("Port connections do not match requirements");
+            foreach (Edge edge in port.connections)
+            {
+                (edge.output.node as GraphNode).Node.RemoveChild((edge.input.node as GraphNode).Node);
+            }
         }
 
 
@@ -93,20 +119,26 @@ namespace CC.SoundSystem.Editor
         }
 
 
-        private class RelationalEdgeConnectorListener : IEdgeConnectorListener
+        private class RelationalEdgeConnector : EdgeConnector<Edge>
         {
-            public void OnDrop(GraphView graphView, Edge edge)
+            public RelationalEdgeConnector() : base(new RelationalEdgeConnectorListener())
             {
-                (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
             }
-
-            public void OnDropOutsidePort(Edge edge, Vector2 position)
+            private class RelationalEdgeConnectorListener : IEdgeConnectorListener
             {
+                public void OnDrop(GraphView graphView, Edge edge)
+                {
+                    (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
 
+                }
+
+                public void OnDropOutsidePort(Edge edge, Vector2 position)
+                {
+                    Debug.Log("Edge 1: " + edge.output.portName);
+                    Debug.Log("Edge 2: " + edge.input.portName);
+                }
             }
         }
-
-
         /// <summary>
         /// Provides the compile time location of this File so that stylesheet may be found.
         /// </summary>

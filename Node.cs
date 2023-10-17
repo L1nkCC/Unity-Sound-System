@@ -9,7 +9,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/14/2023
+    /// Last Edited: 10/17/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -126,20 +126,36 @@ namespace CC.SoundSystem
         /// <summary>
         /// Adds a child Node whilst checking to make sure that the type is unique to the tree
         /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public bool AddChild(Node node)
+        /// <param name="childNode">node to become a child of the calling node</param>
+        /// <returns>true if the node was added as a child, false if the node had a repeated name</returns>
+        public bool AddChild(Node childNode)
         {
             HashSet<string> typesUsed = GetTreeNodeNames();
-            if (!typesUsed.Contains(node.name))
+            if (!typesUsed.Contains(childNode.name))
             {
-                typesUsed.Add(node.name);
-                m_children.Add(node);
-                node.m_parent = this;
+                typesUsed.Add(childNode.name);
+                m_children.Add(childNode);
+                childNode.m_parent = this;
                 return true;
             }
             return false;
         }
+
+        /// <summary>
+        /// Removes a child Node connection
+        /// </summary>
+        /// <param name="childNode">Child Node to be removed</param>
+        /// <returns>true if the node was found and removed. False if not</returns>
+        public bool RemoveChild(Node childNode)
+        {
+            if (m_children.Remove(childNode))
+            {
+                childNode.m_parent = null;
+                return true;
+            }
+            return false;
+        }
+
 
         /// <summary>
         /// Fills out tree children from a set of nodes that are linked to their parents but not their children. Adds Children to their parents m_children. O(nlogn)

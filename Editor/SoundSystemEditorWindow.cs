@@ -25,7 +25,7 @@ namespace CC.SoundSystem.Editor
         SerializedObject m_serialized;
         DomainEditorWindow m_domainWindowSerialized;
 
-
+        
         ListView NodeValues;
         DropdownField DomainSelector; 
 
@@ -84,7 +84,6 @@ namespace CC.SoundSystem.Editor
         }
         private void OnGUI()
         {
-            
             m_serialized.ApplyModifiedProperties();
         }
 
