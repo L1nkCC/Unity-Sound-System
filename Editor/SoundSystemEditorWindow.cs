@@ -76,15 +76,12 @@ namespace CC.SoundSystem.Editor
             //var propertyV = new ListView(tree);
 
             rootVisualElement.Add(splitView);
+            rootVisualElement.Add(new HelpBox("This is a helpbox", HelpBoxMessageType.Error));
             leftPane.Add(DomainSelector);
             leftPane.Add(NodeValues);
             splitView.Add(leftPane);
             rightPane.Add(attempt);
             splitView.Add(rightPane);
-        }
-        private void OnGUI()
-        {
-            m_serialized.ApplyModifiedProperties();
         }
 
     }

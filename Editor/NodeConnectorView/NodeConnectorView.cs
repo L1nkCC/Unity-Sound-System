@@ -12,6 +12,10 @@ namespace CC.SoundSystem.Editor
 {
     public class NodeConnectorView : GraphView
     {
+        public System.Action OnConnectionChange;
+
+
+
         public new class UxmlFactory : UxmlFactory<NodeConnectorView, UxmlTraits> { }
 
         /// <summary>
@@ -30,6 +34,8 @@ namespace CC.SoundSystem.Editor
             this.AddManipulator(new RectangleSelector());
 
             this.StretchToParentSize();
+
+
 
             //tmp load for testing
             LoadDomain(Domain.GetAll()[0]);
@@ -57,11 +63,15 @@ namespace CC.SoundSystem.Editor
 
         /// <summary>
         /// Load GraphNodes for each Node in the domain onto the view 
-        /// NOTE: Spacing out the spawns is not yet implemented
+        /// NOTE: Spacing out the spawns is not yet implemented. May clear connections and save the clearing of those connections
         /// </summary>
         /// <param name="domain">Source for nodes</param>
         public void LoadDomain(string domain)
         {
+            foreach(GraphElement ge in graphElements)
+            {
+                RemoveElement(ge);
+            }
             GraphNode[] nodes = GraphNode.Load(Domain.GetNodes(domain));
             
             for(int i= 0; i< nodes.Length; i++)
@@ -71,6 +81,14 @@ namespace CC.SoundSystem.Editor
             LoadConnections(nodes);
             
         }
+
+        public new void RemoveElement(GraphElement ge)
+        {
+
+        }
+
+
+
         /// <summary>
         /// Will load the connections of the nodes wrapped by Graph node to the Graph View
         /// </summary>

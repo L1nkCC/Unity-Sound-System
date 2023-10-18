@@ -1,15 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Linq;
-using UnityEditor;
-using CC.Core.Utilities.IO;
+
 namespace CC.SoundSystem.Editor
 {
+    /// Author: L1nkCC
+    /// Created: 10/18/2023
+    /// Last Edited: 10/18/2023
+    /// <summary>
+    /// A wrapper class for CC.SoundSystem.Node so that it may be viewable and editable through a GraphView.
+    /// NOTE: Naming Conflict between CC.SoundSystem.Node and UnityEditor.Experimental.GraphView.Node.
+    /// </summary>
     public class GraphNode : UnityEditor.Experimental.GraphView.Node
     {
+        //wrapped node
         public Node Node { get; protected set; }
 
         //Ports  --  Relational
@@ -18,43 +23,66 @@ namespace CC.SoundSystem.Editor
 
 
         /// <summary>
-        /// Constructor
+        /// Constructor to wrap a Node for GraphView Representation
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="node">Wrapped Node</param>
         public GraphNode(Node node) : base()
         {
+            //Set up names and wrapped node
             Node = node;
             title = Node.name;
+            name = Node.name;
 
+            //Setup Parent Port
             ParentPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(bool));
             ParentPort.portName = "Parent";
-            ParentPort.OnConnect += AddChild;
-            ParentPort.OnDisconnect += RemoveChild;
+            ParentPort.OnConnect += AddParent;
+            ParentPort.OnDisconnect += RemoveParent;
             inputContainer.Add(ParentPort);
             
+            //Setup Child Port
             ChildrenPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
             ChildrenPort.portName = "Children";
             outputContainer.Add(ChildrenPort);
             
+            //Expose Details of node
             var nodeDetails = new IMGUIContainer(UnityEditor.Editor.CreateEditor(Node).OnInspectorGUI);
             extensionContainer.Add(nodeDetails);
 
-
+            //Update details
             RefreshExpandedState();
         }
 
+        /// <summary>
+        /// Override of GraphView.Node.InstantiatePort to use CC.SoundSystem.Editor.Port rather than GraphView.Port. 
+        /// A required extention for callbacks for OnConnect and OnDisconnect
+        /// </summary>
+        /// <param name="orientation">Which orientation the ports be on the Node</param>
+        /// <param name="direction">Define if this Port should be an input or output. Helps decide which side the port should be on.</param>
+        /// <param name="capacity">How many connections this port should handle. Either 1 or many.</param>
+        /// <param name="type">Depericated</param>
+        /// <returns>A new CC.SoundSystem.Editor.Port of the given specifications</returns>
         public new virtual Port InstantiatePort(Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type)
         {
             return Port.Create<Edge>(orientation, direction, capacity, type);
         }
 
-        private static void AddChild(UnityEditor.Experimental.GraphView.Port port)
+        /// <summary>
+        /// Given the parent port of the child, add the passed port's GraphNode's node as a child of the passed port's connection's GraphNodes's node.
+        /// NOTE: This is only Available to be used on a port that has Capacity.Single.
+        /// </summary>
+        /// <param name="port">Port that is connected to the child after a connection to a parent</param>
+        private static void AddParent(UnityEditor.Experimental.GraphView.Port port)
         {
             if (port.capacity != UnityEditor.Experimental.GraphView.Port.Capacity.Single) throw new System.ArgumentException("Port must have Single Capacity to add Children");
             Edge edge = port.connections.First();
             (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
         }
-        private static void RemoveChild(UnityEditor.Experimental.GraphView.Port port)
+        /// <summary>
+        /// Given the parent port of the child, remove the passed port's GraphNode's node as a child of the passed port's connection's GraphNodes's node.
+        /// </summary>
+        /// <param name="port">Port that is connected to the child after a disconnection to a parent</param>
+        private static void RemoveParent(UnityEditor.Experimental.GraphView.Port port)
         {
             if(!(port.node as GraphNode).Node.Parent.RemoveChild((port.node as GraphNode).Node))
             {
@@ -76,16 +104,22 @@ namespace CC.SoundSystem.Editor
             for(int i= 0; i < nodes.Length; i++)
             {
                 graphNodes[i] = new GraphNode(nodes[i]);
-                //Place GraphNodes
-                Rect pos = new Rect(graphNodes[i].GetPosition());
-                pos.x += 400 * (i % 10);
-                pos.y += 400 * (i / 10);
-                graphNodes[i].SetPosition(pos);
             }
             return graphNodes;
         }
 
-
+        /// <summary>
+        /// Expose Position Editing 
+        /// </summary>
+        /// <param name="x">x position</param>
+        /// <param name="y">y position</param>
+        public void SetPosition(float x, float y)
+        {
+            Rect pos = new Rect(GetPosition());
+            pos.x = x;
+            pos.y = y;
+            SetPosition(pos);
+        }
 
 
         /// <summary>
@@ -112,41 +146,6 @@ namespace CC.SoundSystem.Editor
                 if (edge.output == parameterNode.ChildrenPort) return true;
             }
             return false;
-        }
-
-
-        private class RelationalEdgeConnector : EdgeConnector<Edge>
-        {
-            public RelationalEdgeConnector() : base(new RelationalEdgeConnectorListener())
-            {
-            }
-            private class RelationalEdgeConnectorListener : IEdgeConnectorListener
-            {
-                public void OnDrop(GraphView graphView, Edge edge)
-                {
-                    (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
-
-                }
-
-                public void OnDropOutsidePort(Edge edge, Vector2 position)
-                {
-                    Debug.Log("Edge 1: " + edge.output.portName);
-                    Debug.Log("Edge 2: " + edge.input.portName);
-                }
-            }
-        }
-        /// <summary>
-        /// Provides the compile time location of this File so that stylesheet may be found.
-        /// </summary>
-        /// Helpful Link : https://stackoverflow.com/questions/47841441/how-do-i-get-the-path-to-the-current-c-sharp-source-code-file
-        private static class FileLocation
-        {
-            public static string Path => GetThisFilePath().Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
-            public static string Directory => System.IO.Path.GetDirectoryName(GetThisFilePath()).Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
-            private static string GetThisFilePath([System.Runtime.CompilerServices.CallerFilePath] string path = null)
-            {
-                return path;
-            }
         }
     }
 }

@@ -61,6 +61,7 @@ namespace CC.SoundSystem.Editor
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
         }
+
         /// <summary>
         /// Draw the values of Volume to the drawer
         /// </summary>

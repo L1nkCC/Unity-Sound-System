@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -12,7 +11,7 @@ namespace CC.SoundSystem
     /// Created: 9/19/2022
     /// Last Edited: 10/17/2023
     /// <summary>
-    /// Port that is a part of GraphView hides callbacks on Connect and Disconnect. I use this to get around that
+    /// UnityEditor.Experimental.GraphView.Port hides callbacks on Connect and Disconnect. This is an extention that exposes the callback actions
     /// NOTE: this code is sourced from https://forum.unity.com/threads/callback-on-edge-connection-in-graphview.796290/
     /// </summary>
     public class Port : UnityEditor.Experimental.GraphView.Port
