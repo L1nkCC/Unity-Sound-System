@@ -2,12 +2,13 @@ using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/18/2023
-    /// Last Edited: 10/18/2023
+    /// Last Edited: 10/19/2023
     /// <summary>
     /// A wrapper class for CC.SoundSystem.Node so that it may be viewable and editable through a GraphView.
     /// NOTE: Naming Conflict between CC.SoundSystem.Node and UnityEditor.Experimental.GraphView.Node.
@@ -20,6 +21,9 @@ namespace CC.SoundSystem.Editor
         //Ports  --  Relational
         public Port ParentPort { get; protected set; }
         public Port ChildrenPort { get; protected set; }
+
+        public static int BASE_WIDTH = 600;
+        public static int BASE_HEIGHT = 300;
 
 
         /// <summary>
@@ -67,6 +71,35 @@ namespace CC.SoundSystem.Editor
             return Port.Create<Edge>(orientation, direction, capacity, type);
         }
 
+
+        /// <summary>
+        /// Get the Parent Node as defined by port connections
+        /// </summary>
+        /// <returns>Connected Parent or null</returns>
+        public GraphNode GetParent()
+        {
+            if(ParentPort.connections.Count() == 1)
+            {
+                return ParentPort.connections.ElementAt(0).output.node as GraphNode;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get Connected Children Nodes as defined by port connections. 
+        /// NOTE: May get off snyc with wrapper but shouldn't
+        /// </summary>
+        /// <returns>All Children Nodes</returns>
+        public GraphNode[] GetChildren()
+        {
+            List<GraphNode> children = new();
+            foreach(Edge edge in ChildrenPort.connections)
+            {
+                children.Add(edge.input.node as GraphNode);
+            }
+            return children.ToArray();
+        }
+
         /// <summary>
         /// Given the parent port of the child, add the passed port's GraphNode's node as a child of the passed port's connection's GraphNodes's node.
         /// NOTE: This is only Available to be used on a port that has Capacity.Single.
@@ -89,7 +122,14 @@ namespace CC.SoundSystem.Editor
                 Debug.Log("Remove Failed");
             }
         }
-
+        /// <summary>
+        /// Clear the Callbacks (OnConnect and OnDisconnect). This is mainly for the purposes of removing a grphnode without updating the connections of the wrapped node.
+        /// </summary>
+        public void ClearCallbacks()
+        {
+            ParentPort.OnConnect = null;
+            ParentPort.OnDisconnect = null;
+        }
 
         /// <summary>
         /// Create a wrapper GraphNode for each CC.SoundSystem.Node passed in

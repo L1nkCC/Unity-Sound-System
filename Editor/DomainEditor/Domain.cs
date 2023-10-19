@@ -10,7 +10,7 @@ namespace CC.SoundSystem.Editor
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/14/2023
+    /// Last Edited: 10/18/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
@@ -59,7 +59,7 @@ namespace CC.SoundSystem.Editor
             string[] nodeNames = new string[nodePaths.Length];
             for(int i= 0; i < nodePaths.Length; i++)
             {
-                nodeNames[i] = Path.GetRelativePath(path + domainName, nodePaths[i]);
+                nodeNames[i] = System.IO.Path.GetFileNameWithoutExtension(nodePaths[i]);
             }
             return nodeNames;
         }
@@ -93,7 +93,7 @@ namespace CC.SoundSystem.Editor
             return countOfRoots == 1;
         }
         #endregion
-        #region Adding Nodes
+        #region Domain
         /// <summary>
         /// Create a node for each name passed in at a folder with fileName
         /// </summary>
@@ -111,6 +111,16 @@ namespace CC.SoundSystem.Editor
             }
         }
         /// <summary>
+        /// Delete Domain by name
+        /// </summary>
+        /// <param name="domainName">Folder to Delete with path relative to the Domains Folder</param>
+        public static void DeleteDomain(string domainName)
+        {
+            AssetDatabase.DeleteAsset((path+domainName).GetRelativeUnityPath());
+        }
+        #endregion
+        #region Nodes
+        /// <summary>
         /// Saves and adds a node to the domain specified, saving it to the domain's folder
         /// NOTE: Will throw a DomainUniqueNamingException() if the passed node shares a name with a node already in the domain
         /// </summary>
@@ -123,15 +133,17 @@ namespace CC.SoundSystem.Editor
             AssetDatabase.CreateAsset(node, nodeSavePath.GetRelativeUnityPath());
             AssetDatabase.SaveAssets();
         }
-        #endregion
-        #region Delete Domain
         /// <summary>
-        /// Delete Domain by name
+        /// Removes specified node from domain if it is in the domain. Throws an Error if it is not
         /// </summary>
-        /// <param name="domainName">Folder to Delete with path relative to the Domains Folder</param>
-        public static void DeleteDomain(string domainName)
+        /// <param name="domainName">Domain to search</param>
+        /// <param name="node">Node to delete</param>
+        public static void DeleteNode(string domainName, Node node)
         {
-            AssetDatabase.DeleteAsset((path+domainName).GetRelativeUnityPath());
+            if (!GetNodeNames(domainName).Contains(node.name)) throw new System.ArgumentException("Domain " + domainName + " does not contain a node named " + node.name);
+            string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
+            AssetDatabase.DeleteAsset(nodeSavePath.GetRelativeUnityPath());
+            AssetDatabase.SaveAssets();
         }
         #endregion
 
