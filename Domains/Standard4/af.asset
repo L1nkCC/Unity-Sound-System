@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9625fb266bfec1489f80fddecc04b2a, type: 3}
-  m_Name: Master
+  m_Name: af
   m_EditorClassIdentifier: 
-  m_name: Master
   m_parent: {fileID: 0}
   m_children: []
+  m_clips: []
   m_multiplier: 1
   m_muted: 0

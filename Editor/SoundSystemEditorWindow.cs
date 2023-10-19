@@ -21,16 +21,19 @@ namespace CC.SoundSystem.Editor
 {
     public class SoundSystemEditorWindow : EditorWindow
     {
-
+        //Serializations
         SerializedObject m_serialized;
         DomainEditorWindow m_domainWindowSerialized;
 
-        
+        //Components
         ListView NodeValues;
-        DropdownField DomainSelector; 
+        DropdownField DomainSelector;
 
+        //inputValues
         [SerializeField] int m_selectedDomainIndex = 0;
 
+
+        //Current Status Variables
         string[] Domains => Domain.GetAll();
         string SelectedDomain => Domains[m_selectedDomainIndex];
         Node[] Nodes => Domain.GetNodes(SelectedDomain);  
@@ -56,33 +59,22 @@ namespace CC.SoundSystem.Editor
             var leftPane = new VisualElement();
             var rightPane = new VisualElement();
 
-            var attempt = new NodeConnectorView();
-
-
+            var ConnectorView = new NodeConnectorView();
+            ConnectorView.OnConnectionChange += () => rootVisualElement.AddDomainNotices(SelectedDomain);
+            ConnectorView.OnAddNode += () => rootVisualElement.AddDomainNotices(SelectedDomain);
             m_selectedDomainIndex = DomainSelector.index;
             NodeValues.itemsSource = Domain.GetNodeNames(SelectedDomain);
             NodeValues.Rebuild();
-            //var attempt2 = new GraphElement();
-
             //attempt.AddElement();
             //new IMGUIContainer(m_domainWindowSerialized.OnGUI);
 
-
-            /*typeof(Utilities.SoundTree<>).GetType().MakeGenericType(new System.Type[] { SelectedEnum });
-            var tree = typeof(Utilities.SoundTree<>).GetConstructor(new System.Type[] { SelectedEnum }).Invoke(new string[0]);
-
-            throw new System.Exception("tree + " + tree.ToString());*/
-
-            //var propertyV = new ListView(tree);
-
             rootVisualElement.Add(splitView);
-            rootVisualElement.Add(new HelpBox("This is a helpbox", HelpBoxMessageType.Error));
             leftPane.Add(DomainSelector);
             leftPane.Add(NodeValues);
             splitView.Add(leftPane);
-            rightPane.Add(attempt);
+            rightPane.Add(ConnectorView);
             splitView.Add(rightPane);
+            ConnectorView.OnConnectionChange();
         }
-
     }
 }

@@ -11,11 +11,12 @@ using System.Linq;
 
 namespace CC.SoundSystem.Editor
 {
-    public class NodeConnectorView : GraphView
+    public class NodeConnectorView : GraphView, IDomain
     {
-        public System.Action OnConnectionChange = new(()=> { });
-        private string domainName;
-        protected IEnumerable<GraphNode> graphNodes { 
+        public System.Action OnConnectionChange = ()=> { };
+        public System.Action OnAddNode = () => { };
+        private string m_domainName;
+        protected IEnumerable<GraphNode> GraphNodes { 
             get 
             {
                 return graphElements.Where(
@@ -41,10 +42,10 @@ namespace CC.SoundSystem.Editor
 
             this.StretchToParentSize();
 
-            domainName = Domain.GetAll()[0];
+            m_domainName = Domain.GetAll()[0];
 
             //tmp load for testing
-            LoadDomain(domainName);
+            LoadDomain(m_domainName);
         }
 
 
@@ -55,14 +56,14 @@ namespace CC.SoundSystem.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
-            this.AddManipulator(CreateGraphNodeContextualMenu());
+            this.AddManipulator(CreateAddGraphNodeContextualMenu());
         }
 
-        private IManipulator CreateGraphNodeContextualMenu()
+        private IManipulator CreateAddGraphNodeContextualMenu()
         {
             ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator
                 (
-                    menuEvent => menuEvent.menu.AppendAction("Add Node", actionEvent => AddGraphNode("Nameless"))
+                    menuEvent => menuEvent.menu.AppendAction("Add Node", actionEvent => CreateGraphNodeWindow.CreateInstance(this))
                 );
             return menuManipulator;
         }
@@ -112,9 +113,8 @@ namespace CC.SoundSystem.Editor
 
         public void PlaceNodes(GraphNode[] nodes)
         {
-            void position(GraphNode node, int level, int depth)
+            static void position(GraphNode node, int level, int depth)
             {
-                Debug.Log("NODE: " + node.Node.name + "    LEVEL: " + level + "   DEPTH: " + depth);
                 float y = level * GraphNode.BASE_HEIGHT;
                 float x = depth * GraphNode.BASE_WIDTH;
                 node.SetPosition(x, y);
@@ -150,33 +150,31 @@ namespace CC.SoundSystem.Editor
             }
         }
 
-
-        public void DeleteElement(GraphNode ge)
-        {
-            string domainName = Domain.GetDomainOf(ge.Node);
-            base.RemoveElement(ge);
-            Domain.DeleteNode(domainName, ge.Node);
-        }
-
         public new void RemoveElement(GraphElement ge)
         {
             if(ge.GetType() == typeof(GraphNode))
             {
-                (ge as GraphNode).ClearCallbacks();
+                Domain.DeleteNode(m_domainName, (ge as GraphNode).Node);
             }
             base.RemoveElement(ge);
         }
         public new void AddElement(GraphElement ge)
         {
-            if (typeof(GraphNode) != ge.GetType()) throw new System.ArgumentException("AddElement() only accepts GraphElements of type GraphNode. " + ge +" is not of type GraphNode");
             base.AddElement(ge);
-            LoadConnections(ge as GraphNode);
+            if(ge.GetType() == typeof(GraphNode))
+            {
+                GraphNode graphNode = ge as GraphNode;
+                LoadConnections(graphNode);
+                graphNode.ParentPort.OnConnect += (Port port) => { OnConnectionChange(); };
+                graphNode.ParentPort.OnDisconnect += (Port port) => { OnConnectionChange(); };
+                OnAddNode();
+            }
         }
 
-        public GraphNode AddGraphNode(string nodeName)
+        public GraphNode AddNewGraphNode(string nodeName, Node parent = null)
         {
             GraphNode graphNode = new GraphNode(Node.CreateInstance(nodeName));
-            Domain.AddNode(domainName, graphNode.Node);
+            Domain.AddNode(m_domainName, graphNode.Node);
             AddElement(graphNode);
             return graphNode;
         }
@@ -187,19 +185,17 @@ namespace CC.SoundSystem.Editor
         /// <param name="graphNode">Node to load connections of</param>
         private void LoadConnections(GraphNode graphNode)
         {
-            foreach (GraphNode connectedGraphNode in graphNodes)
+            foreach (GraphNode connectedGraphNode in GraphNodes)
             {
                 if(graphNode.Node.Parent == connectedGraphNode.Node)
                 {
                     Edge edge = graphNode.ParentPort.ConnectTo(connectedGraphNode.ChildrenPort);
-                    base.AddElement(edge);
-                    OnConnectionChange();
+                    AddElement(edge);
                 }
                 if (connectedGraphNode.Node.Parent == graphNode.Node)
                 {
                     Edge edge = connectedGraphNode.ParentPort.ConnectTo(graphNode.ChildrenPort);
-                    base.AddElement(edge);
-                    OnConnectionChange();
+                    AddElement(edge);
                 }
             }
         }

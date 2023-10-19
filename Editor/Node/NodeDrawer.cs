@@ -8,7 +8,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/14/2023
-    /// Last Edited: 10/14/2023
+    /// Last Edited: 10/19/2023
     /// 
     /// <summary>
     /// Custom Drawer for the CC.SoundSystem.Node
@@ -59,7 +59,8 @@ namespace CC.SoundSystem.Editor
             DrawErrors();
             
             serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
+            if(Event.current.type == EventType.Repaint)
+                serializedObject.Update();
         }
 
         /// <summary>
@@ -141,24 +142,18 @@ namespace CC.SoundSystem.Editor
         {
             if(m_children.arraySize == 0 && (serializedObject.targetObject as Node).IsRoot)
             {
-                EditorGUILayout.HelpBox(new("This node is a root a leaf!"), MessageType.Warning);
+                EditorGUILayout.HelpBox(new("This node is a root and a leaf!"), MessageType.Warning);
             }
             if(m_children.arraySize == 0 && m_clips.arraySize == 0)
             {
                 EditorGUILayout.HelpBox(new("This node has no clips to play and is a leaf!"), MessageType.Warning);
             }
-            
-            
         }
         /// <summary>
         /// Check for Errors and display them
         /// </summary>
         private void DrawErrors()
         {
-            if (!Domain.HasOneRoot(Domain.GetDomainOf(serializedObject.targetObject as Node)))
-            {
-                EditorGUILayout.HelpBox(new("This domain has no well defined root!"), MessageType.Error);
-            }
         }
 
         //assure that windows will share same values

@@ -128,7 +128,7 @@ namespace CC.SoundSystem.Editor
         /// <param name="node">The node to be saved</param>
         public static void AddNode(string domainName, Node node)
         {
-            if (GetNodeNames(domainName).Contains(node.name)) throw new DomainUniqueNamingException("Domain "+ domainName + " already has a node named " + node.name + ". Please Enter a unqiuely named node for this domain");
+            ValidateNodeName(domainName, node.name);
             string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
             AssetDatabase.CreateAsset(node, nodeSavePath.GetRelativeUnityPath());
             AssetDatabase.SaveAssets();
@@ -151,29 +151,25 @@ namespace CC.SoundSystem.Editor
         /// <summary>
         /// Validate Inputs For IO operations
         /// </summary>
-        /// <param name="domainNames"></param>
+        /// <param name="domainName"></param>
         /// <param name="nodeNames"></param>
-        private static void ValidateInputs(string domainNames, string[] nodeNames)
+        private static void ValidateInputs(string domainName, string[] nodeNames)
         {
-            if (Directory.Exists(path + domainNames)) throw new DomainUniqueNamingException("Domain Already Exists. Please Enter another name for the domain");
-            if (nodeNames.Distinct().Count() != nodeNames.Length) throw new DomainUniqueNamingException("Node Names are not distinct. Please Enter names that are unique");
+            if (Directory.Exists(path + domainName)) throw new InputValidationException("Domain Already Exists. Please Enter another name for the domain");
+            if (nodeNames.Distinct().Count() != nodeNames.Length) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
             nodeNames.ValidateInput();
-            domainNames.ValidateInput();
+            domainName.ValidateInput();
         }
 
-
         /// <summary>
-        /// Exception regarding naming conflictions within Domains or with Domains
+        /// Check to make sure a nodeName is a valid input. Will throw a InputValidationException if not
         /// </summary>
-        [Serializable]
-        public class DomainUniqueNamingException : Exception
+        /// <param name="domainName">Domain to check</param>
+        /// <param name="nodeName">Node that may be added</param>
+        public static void ValidateNodeName(string domainName, string nodeName)
         {
-            public DomainUniqueNamingException() { }
-            public DomainUniqueNamingException(string message) : base(message) { }
-            public DomainUniqueNamingException(string message, Exception inner) : base(message, inner) { }
-            protected DomainUniqueNamingException(
-              System.Runtime.Serialization.SerializationInfo info,
-              System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+            if (GetNodeNames(domainName).Contains(nodeName)) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
+            nodeName.ValidateInput();
         }
 
 
