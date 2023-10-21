@@ -21,22 +21,30 @@ namespace CC.SoundSystem.Editor
 {
     public class SoundSystemEditorWindow : EditorWindow
     {
-        //Serializations
-        SerializedObject m_serialized;
-        DomainEditorWindow m_domainWindowSerialized;
-
         //Components
         ListView NodeValues;
         DropdownField DomainSelector;
+        NodeConnectorView ConnectorView;
+        TwoPaneSplitView SplitView;
+        VisualElement LeftPane;
+        VisualElement RightPane;
 
-        //inputValues
-        [SerializeField] int m_selectedDomainIndex = 0;
+        System.Action OnDomainSelectionChange = ()=>{};
 
-
+        string m_selectedDomain = Domain.GetAll()[0];
         //Current Status Variables
         string[] Domains => Domain.GetAll();
-        string SelectedDomain => Domains[m_selectedDomainIndex];
-        Node[] Nodes => Domain.GetNodes(SelectedDomain);  
+        string SelectedDomain {
+            get
+            {
+                return m_selectedDomain;
+            } 
+            set
+            {
+                m_selectedDomain = value;
+                OnDomainSelectionChange();
+            }
+        }
 
         [MenuItem("Window/CC/Sound System/GraphView")]
         public static void CreateWindow()
@@ -47,34 +55,60 @@ namespace CC.SoundSystem.Editor
         private void OnEnable()
         {
             titleContent = new("Sound System");
-            m_serialized = new SerializedObject(this);
-            m_domainWindowSerialized = CreateInstance<DomainEditorWindow>();
-            NodeValues = new ListView();
-            DomainSelector = new DropdownField(Domains.ToList(), 0);
+            Init();
         }
 
         public void CreateGUI()
         {
-            var splitView = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
-            var leftPane = new VisualElement();
-            var rightPane = new VisualElement();
+            ConnectUIElements();
 
-            var ConnectorView = new NodeConnectorView();
-            ConnectorView.OnConnectionChange += () => rootVisualElement.AddDomainNotices(SelectedDomain);
-            ConnectorView.OnAddNode += () => rootVisualElement.AddDomainNotices(SelectedDomain);
-            m_selectedDomainIndex = DomainSelector.index;
+            UpdateList();
+            ConnectorView.OnConnectionChange();
+        }
+
+        private void Init()
+        {
+            InitElements();
+            InitCallbacks();
+        }
+
+        private void InitElements()
+        {
+            SplitView = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
+            LeftPane = new VisualElement();
+            RightPane = new VisualElement();
+            NodeValues = new ListView();
+            DomainSelector = new DropdownField(Domains.ToList(), 0);
+            ConnectorView = new NodeConnectorView();
+
+        }
+        private void InitCallbacks()
+        {
+            DomainSelector.RegisterValueChangedCallback(evt => SelectedDomain = evt.newValue);
+            OnDomainSelectionChange += UpdateList;
+            OnDomainSelectionChange += UpdateConnector;
+            ConnectorView.OnConnectionChange += () => rootVisualElement.UpdateDomainNotices(SelectedDomain);
+            ConnectorView.OnAddNode += () => rootVisualElement.UpdateDomainNotices(SelectedDomain);
+        }
+
+        private void ConnectUIElements()
+        {
+            rootVisualElement.Add(SplitView);
+            LeftPane.Add(DomainSelector);
+            LeftPane.Add(NodeValues);
+            SplitView.Add(LeftPane);
+            RightPane.Add(ConnectorView);
+            SplitView.Add(RightPane);
+        }
+
+        public void UpdateList()
+        {
             NodeValues.itemsSource = Domain.GetNodeNames(SelectedDomain);
             NodeValues.Rebuild();
-            //attempt.AddElement();
-            //new IMGUIContainer(m_domainWindowSerialized.OnGUI);
-
-            rootVisualElement.Add(splitView);
-            leftPane.Add(DomainSelector);
-            leftPane.Add(NodeValues);
-            splitView.Add(leftPane);
-            rightPane.Add(ConnectorView);
-            splitView.Add(rightPane);
-            ConnectorView.OnConnectionChange();
+        }
+        public void UpdateConnector()
+        {
+            ConnectorView.LoadDomain(SelectedDomain);
         }
     }
 }
