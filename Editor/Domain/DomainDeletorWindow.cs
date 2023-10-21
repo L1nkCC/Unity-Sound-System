@@ -19,15 +19,8 @@ namespace CC.SoundSystem.Editor
         [SerializeField] int m_domainToDeleteIndex;
         string DomainToDelete => Domain.GetAll()[m_domainToDeleteIndex];
 
-
-        /// <summary>
-        /// Allow for creation through tool bar
-        /// </summary>
-        [MenuItem("Window/CC/Sound System/Domain/Deletor")]
-        public static void CreateWindow()
-        {
-            GetWindow<DomainDeletorWindow>();
-        }
+        //Callback
+        public System.Action<string> OnDomainDeleted = (string domainName) => { };
 
         /// <summary>
         /// Generic Setup
@@ -58,7 +51,18 @@ namespace CC.SoundSystem.Editor
             m_domainToDeleteIndex = EditorGUILayout.Popup(m_domainToDeleteIndex, Domain.GetAll());
             EditorGUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Delete Domain")) { Domain.DeleteDomain(DomainToDelete); ShowNotification(new("Domain Deleted Successfully!")); }
+            if (GUILayout.Button("Delete Domain")) { DeleteDomain(); }
+        }
+
+        /// <summary>
+        /// Handle Deletion for Button Press
+        /// </summary>
+        private void DeleteDomain()
+        {
+            string domainTargetForDeletion = DomainToDelete;
+            Domain.DeleteDomain(domainTargetForDeletion);
+            OnDomainDeleted(domainTargetForDeletion);
+            ShowNotification(new("Domain "+ domainTargetForDeletion + " Deleted Successfully!"));
         }
     }
 }

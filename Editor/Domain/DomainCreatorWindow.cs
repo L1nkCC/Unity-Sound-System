@@ -19,14 +19,8 @@ namespace CC.SoundSystem.Editor
         [SerializeField] string m_domainName;
         [SerializeField] string[] m_nodeNames;
 
-        /// <summary>
-        /// Allow for creation through tool bar
-        /// </summary>
-        [MenuItem("Window/CC/Sound System/Domain/Creator")]
-        public static void CreateWindow()
-        {
-            GetWindow<DomainCreatorWindow>();
-        }
+        //Callback
+        public System.Action<string> OnDomainCreation = (string domainName) => { };
 
         /// <summary>
         /// Generic Setup
@@ -55,8 +49,20 @@ namespace CC.SoundSystem.Editor
             EditorGUILayout.PropertyField(m_serialized.FindProperty("m_domainName"));
             Core.Utilities.GUI.Layout.DisplayArray(m_serialized.FindProperty("m_nodeNames"));
 
-            if (GUILayout.Button("Create Domain")) { Domain.CreateDomain(m_domainName, m_nodeNames); ResetCreationValues(); ShowNotification(new("Domain Created Successfully!")); }
+            if (GUILayout.Button("Create Domain")) { CreateDomain();  }
         }
+
+        /// <summary>
+        /// Handle Creation after button press
+        /// </summary>
+        private void CreateDomain()
+        {
+            Domain.CreateDomain(m_domainName, m_nodeNames); 
+            OnDomainCreation(m_domainName); 
+            ResetCreationValues(); 
+            ShowNotification(new("Domain " + m_domainName + " Created Successfully!"));
+        }
+
         /// <summary>
         /// Reset the values of the Creation Screen so user does not have to clean them out
         /// </summary>

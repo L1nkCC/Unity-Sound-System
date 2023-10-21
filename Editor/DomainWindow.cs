@@ -17,11 +17,26 @@ namespace CC.SoundSystem.Editor
         //this serialized
         SerializedObject m_serialized;
 
+        //Types of windows to be referenced. This is the name that will show in the tab selector
+        private enum DomainWindowType
+        {
+            Creator = 0,
+            Deletor,
+            Content,
+        }
+
         //tabs
         int m_tabSelected = 0;
-        static readonly string[] TAB_OPTIONS = { "Create Domain", "Delete Domain", "Domain Content"};
+        static readonly string[] TAB_OPTIONS = System.Enum.GetNames(typeof(DomainWindowType));
 
+        //windows organized for internal use
         IIMGUIElement[] windows;
+
+        //Accessors for the windows
+        public DomainCreatorWindow Creator => windows[(int)DomainWindowType.Creator] as DomainCreatorWindow;
+        public DomainDeletorWindow Deletor => windows[(int)DomainWindowType.Deletor] as DomainDeletorWindow;
+        public DomainContentWindow Content => windows[(int)DomainWindowType.Content] as DomainContentWindow;
+
 
         /// <summary>
         /// Allow for creation through tool bar

@@ -24,16 +24,6 @@ namespace CC.SoundSystem.Editor
         System.Action<Node> OnNodeSelected = (Node node) => { };
         System.Action<string> OnDomainSelectionChange = (string domainName) => { };
 
-
-        /// <summary>
-        /// Allow for creation through tool bar
-        /// </summary>
-        [MenuItem("Window/CC/Sound System/Domain/Content")]
-        public static void CreateWindow()
-        {
-            GetWindow<DomainContentWindow>();
-        }
-
         /// <summary>
         /// Generic Setup
         /// </summary>
