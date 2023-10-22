@@ -51,22 +51,28 @@ namespace CC.SoundSystem.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
-            this.AddManipulator(CreateAddGraphNodeContextualMenu());
+            this.AddManipulator(CreateContextualMenuManipulator());
         }
 
-        private IManipulator CreateAddGraphNodeContextualMenu()
+        /// <summary>
+        /// Create a basic Contextual Menu that only allow for Creation and Deletion of GraphNodes
+        /// </summary>
+        /// <returns> Manipulator to be added to View</returns>
+        private IManipulator CreateContextualMenuManipulator()
         {
             ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator
                 (
                     menuEvent => 
                     {
-                        GraphNode target = null;
-                        if (menuEvent.target is GraphNode) target = menuEvent.target as GraphNode;
+                        GraphNode[] selectedGraphNodes = selection.Where(selected => selected is GraphNode).Select(selected => selected as GraphNode).ToArray();
+                        string plural = selectedGraphNodes.Length > 1 ? "s" : "";
                         menuEvent.menu.ClearItems();
-                        
-                        if (menuEvent.target is GraphNode) menuEvent.menu.AppendAction("Delete Node", actionEvent => Debug.Log(target.Node.name));
 
                         menuEvent.menu.AppendAction("Add Node", actionEvent => CreateGraphNodeWindow.CreateInstance(this)); 
+                        if (selectedGraphNodes.Length > 0) 
+                        {
+                            menuEvent.menu.AppendAction("Delete Node" + plural, actionEvent => DeleteGraphNodes(selectedGraphNodes)); 
+                        }
                     }
                 );
             return menuManipulator;
@@ -178,10 +184,15 @@ namespace CC.SoundSystem.Editor
             }
         }
 
-        public void DeleteGraphNode(GraphNode graphNode)
+        private void DeleteGraphNodes(IEnumerable<GraphNode> graphNodes)
         {
-            Domain.DeleteNode(m_selectedDomain, graphNode.Node);
+            foreach (GraphNode graphNode in graphNodes)
+                DeleteGraphNode(graphNode);
+        }
+        private void DeleteGraphNode(GraphNode graphNode)
+        {
             base.RemoveElement(graphNode);
+            Domain.DeleteNode(m_selectedDomain, graphNode.Node);
         }
 
         public new void RemoveElement(GraphElement ge)
