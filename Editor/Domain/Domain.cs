@@ -10,7 +10,7 @@ namespace CC.SoundSystem.Editor
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/18/2023
+    /// Last Edited: 10/21/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
@@ -19,6 +19,7 @@ namespace CC.SoundSystem.Editor
     {
         static readonly string path = Directory.GetParent(Directory.GetParent(FileLocation.Directory).FullName).FullName + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
+
 
         #region Getters
         /// <summary>
@@ -110,14 +111,47 @@ namespace CC.SoundSystem.Editor
                 AddNode(domainName, node);
             }
         }
+
         /// <summary>
-        /// Delete Domain by name
+        /// Set up a default Domain so domain folder is never empty
+        /// </summary>
+        public static void CreateDefaultDomain()
+        {
+            try
+            {
+                string domainName = "Default";
+                CreateDomain(domainName, new string[0]);
+                Node master = Node.CreateInstance("Master");
+                Node background = Node.CreateInstance("Background", master);
+                Node UI = Node.CreateInstance("UI", master);
+                Node PlayerActions = Node.CreateInstance("PlayerActions", master);
+                Node EntityActions = Node.CreateInstance("EntityActions", master);
+                AddNode(domainName, master);
+                AddNode(domainName, background);
+                AddNode(domainName, UI);
+                AddNode(domainName, PlayerActions);
+                AddNode(domainName, EntityActions);
+            }catch(InputValidationException e)
+            {
+                throw new ApplicationException("Cannot Delete Default Domain if it is the only domain that exists. \n"+e.Message);
+            }
+
+        }
+
+
+        /// <summary>
+        /// Delete Domain by name, If no domain would remain, this creates a defualt Domain.
         /// </summary>
         /// <param name="domainName">Folder to Delete with path relative to the Domains Folder</param>
         public static void DeleteDomain(string domainName)
         {
-            AssetDatabase.DeleteAsset((path+domainName).GetRelativeUnityPath());
+            if (Domain.GetAll().Length == 1 && File.Exists(path + domainName))
+            {
+                CreateDefaultDomain();
+            }
+            AssetDatabase.DeleteAsset((path + domainName).GetRelativeUnityPath());
         }
+
         #endregion
         #region Nodes
         /// <summary>
@@ -155,7 +189,8 @@ namespace CC.SoundSystem.Editor
         /// <param name="nodeNames"></param>
         private static void ValidateInputs(string domainName, string[] nodeNames)
         {
-            if (Directory.Exists(path + domainName)) throw new InputValidationException("Domain Already Exists. Please Enter another name for the domain");
+            if (string.IsNullOrWhiteSpace(domainName)) throw new InputValidationException("Domain Name must not be white space or null");
+            if (Directory.Exists(path + domainName)) throw new InputValidationException("Domain "+ domainName + " Already Exists. Please Enter another name for the domain");
             if (nodeNames.Distinct().Count() != nodeNames.Length) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
             nodeNames.ValidateInput();
             domainName.ValidateInput();

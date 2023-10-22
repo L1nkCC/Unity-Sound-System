@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9625fb266bfec1489f80fddecc04b2a, type: 3}
-  m_Name: Player
+  m_Name: PlayerActions
   m_EditorClassIdentifier: 
-  m_parent: {fileID: 0}
+  m_parent: {fileID: 11400000, guid: e2871e4b45d5cd74f8939cca57b8cd54, type: 2}
   m_children: []
   m_clips: []
   m_multiplier: 1

@@ -9,7 +9,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/17/2023
+    /// Last Edited: 10/21/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -45,6 +45,7 @@ namespace CC.SoundSystem
             node.m_parent = parent;
             return node;
         }
+
 
         /// <summary>
         /// Get the top level Node from the tree this node is in. NOTE: Will run forever if Head node has a parent assigned
@@ -91,8 +92,6 @@ namespace CC.SoundSystem
             }
             return typeMultiplier;
         }
-
-
 
 
         #region Child related Operations

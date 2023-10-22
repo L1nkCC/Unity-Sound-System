@@ -15,7 +15,7 @@ namespace CC.SoundSystem.Editor
     {
         public System.Action OnConnectionChange = ()=> { };
         public System.Action OnAddNode = () => { };
-        private string m_domainName;
+        private string m_selectedDomain;
         protected IEnumerable<GraphNode> GraphNodes { 
             get 
             {
@@ -41,11 +41,6 @@ namespace CC.SoundSystem.Editor
             AddManipulators();
 
             this.StretchToParentSize();
-
-            m_domainName = Domain.GetAll()[0];
-
-            //tmp load for testing
-            LoadDomain(m_domainName);
         }
 
 
@@ -94,17 +89,14 @@ namespace CC.SoundSystem.Editor
 
         /// <summary>
         /// Load GraphNodes for each Node in the domain onto the view 
-        /// NOTE: Spacing out the spawns is not yet implemented. May clear connections and save the clearing of those connections
         /// </summary>
         /// <param name="domain">Source for nodes</param>
         public void LoadDomain(string domain)
         {
+            m_selectedDomain = domain;
             foreach(GraphElement ge in graphElements)
             {
-                if (ge is GraphNode)
-                    RemoveGraphNode(ge as GraphNode);
-                else
-                    RemoveElement(ge);
+                RemoveElement(ge);
             }
             GraphNode[] nodes = GraphNode.Load(Domain.GetNodes(domain));
             
@@ -113,7 +105,31 @@ namespace CC.SoundSystem.Editor
                 AddElement(nodes[i]);
             }
             PlaceNodes(nodes);
-            
+        }
+
+        private GraphNode GetCorrespondingGraphNode(Node node)
+        {
+            foreach (GraphNode graphNode in GraphNodes)
+            {
+                if (graphNode.Node == node)
+                {
+                    return graphNode;
+                }
+            }
+            return null;
+        }
+        public void Focus(Node node)
+        {
+            GraphNode graphNode = GetCorrespondingGraphNode(node);
+            if (graphNode == null) return;
+            Focus(graphNode);
+        }
+        public void Focus(GraphElement graphElement)
+        {
+            Vector3 newPosition = new Vector3(-graphElement.GetPosition().x, -graphElement.GetPosition().y, graphElement.transform.position.z) +//put node at top left corner
+                new Vector3(viewport.contentRect.width/2 - graphElement.contentRect.width/2, viewport.contentRect.height/2 - graphElement.contentRect.height/2); // position in center
+            UpdateViewTransform(newPosition, graphElement.transform.scale);
+            graphElement.Focus();
         }
 
 
@@ -125,9 +141,9 @@ namespace CC.SoundSystem.Editor
                 float x = depth * GraphNode.BASE_WIDTH;
                 node.SetPosition(x, y);
             }
-            GraphNode[] roots = nodes.Where(node => node.GetParent() == null).ToArray();
+            GraphNode[] roots = nodes.Where(node => node.Node.IsRoot).ToArray();
             HashSet<GraphNode> visited = new();
-            int level = -1;
+            int level = 0;
             for(int iroot =0; iroot < roots.Length; iroot++)
             {
                 Stack<(GraphNode, int)> stack = new(); //hold graphnode and current depth for that node
@@ -156,9 +172,9 @@ namespace CC.SoundSystem.Editor
             }
         }
 
-        public void RemoveGraphNode(GraphNode graphNode)
+        public void DeleteGraphNode(GraphNode graphNode)
         {
-            graphNode.ClearCallbacks();
+            Domain.DeleteNode(m_selectedDomain, graphNode.Node);
             base.RemoveElement(graphNode);
         }
 
@@ -166,7 +182,7 @@ namespace CC.SoundSystem.Editor
         {
             if(ge.GetType() == typeof(GraphNode))
             {
-                Domain.DeleteNode(m_domainName, (ge as GraphNode).Node);
+                (ge as GraphNode).ClearCallbacks();
             }
             base.RemoveElement(ge);
         }
@@ -186,7 +202,7 @@ namespace CC.SoundSystem.Editor
         public GraphNode AddNewGraphNode(string nodeName, Node parent = null)
         {
             GraphNode graphNode = new GraphNode(Node.CreateInstance(nodeName));
-            Domain.AddNode(m_domainName, graphNode.Node);
+            Domain.AddNode(m_selectedDomain, graphNode.Node);
             AddElement(graphNode);
             return graphNode;
         }

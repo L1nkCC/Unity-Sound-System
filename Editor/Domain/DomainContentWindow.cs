@@ -21,8 +21,8 @@ namespace CC.SoundSystem.Editor
         Node[] Nodes => Domain.GetNodes(SelectedDomain);
 
         //Callbacks
-        System.Action<Node> OnNodeSelected = (Node node) => { };
-        System.Action<string> OnDomainSelectionChange = (string domainName) => { };
+        public System.Action<Node> OnNodeSelected = (Node node) => { };
+        public System.Action<string> OnDomainSelectionChange = (string domainName) => { };
 
         /// <summary>
         /// Generic Setup

@@ -60,8 +60,9 @@ namespace CC.SoundSystem.Editor
         private void DeleteDomain()
         {
             string domainTargetForDeletion = DomainToDelete;
-            Domain.DeleteDomain(domainTargetForDeletion);
+            if (Domain.GetAll().Length == 1) Domain.CreateDefaultDomain();
             OnDomainDeleted(domainTargetForDeletion);
+            Domain.DeleteDomain(domainTargetForDeletion);
             ShowNotification(new("Domain "+ domainTargetForDeletion + " Deleted Successfully!"));
         }
     }

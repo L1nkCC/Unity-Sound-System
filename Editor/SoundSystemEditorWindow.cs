@@ -22,29 +22,18 @@ namespace CC.SoundSystem.Editor
     public class SoundSystemEditorWindow : EditorWindow
     {
         //Components
-        ListView NodeValues;
-        DropdownField DomainSelector;
         NodeConnectorView ConnectorView;
         TwoPaneSplitView SplitView;
         VisualElement LeftPane;
         VisualElement RightPane;
+        VisualElement DomainEditorView;
 
-        System.Action OnDomainSelectionChange = ()=>{};
+        DomainWindow DomainEditorWindow;
+
 
         string m_selectedDomain = Domain.GetAll()[0];
         //Current Status Variables
         string[] Domains => Domain.GetAll();
-        string SelectedDomain {
-            get
-            {
-                return m_selectedDomain;
-            } 
-            set
-            {
-                m_selectedDomain = value;
-                OnDomainSelectionChange();
-            }
-        }
 
         [MenuItem("Window/CC/Sound System/GraphView")]
         public static void CreateWindow()
@@ -61,11 +50,10 @@ namespace CC.SoundSystem.Editor
         public void CreateGUI()
         {
             ConnectUIElements();
-
-            UpdateList();
             ConnectorView.OnConnectionChange();
+            ConnectorView.LoadDomain(m_selectedDomain);
         }
-
+        
         private void Init()
         {
             InitElements();
@@ -77,38 +65,48 @@ namespace CC.SoundSystem.Editor
             SplitView = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
             LeftPane = new VisualElement();
             RightPane = new VisualElement();
-            NodeValues = new ListView();
-            DomainSelector = new DropdownField(Domains.ToList(), 0);
             ConnectorView = new NodeConnectorView();
+
+            DomainEditorWindow = CreateInstance<DomainWindow>();
+            DomainEditorView = new IMGUIContainer(DomainEditorWindow.OnGUI);
 
         }
         private void InitCallbacks()
         {
-            DomainSelector.RegisterValueChangedCallback(evt => SelectedDomain = evt.newValue);
-            OnDomainSelectionChange += UpdateList;
-            OnDomainSelectionChange += UpdateConnector;
-            ConnectorView.OnConnectionChange += () => rootVisualElement.UpdateDomainNotices(SelectedDomain);
-            ConnectorView.OnAddNode += () => rootVisualElement.UpdateDomainNotices(SelectedDomain);
+            DomainEditorWindow.Content.OnDomainSelectionChange += (string domainName) => { m_selectedDomain = domainName; UpdateConnector(); };
+            DomainEditorWindow.Deletor.OnDomainDeleted += (string domainName) => { DomainDeleted(domainName); UpdateConnector(); };
+            DomainEditorWindow.Content.OnNodeSelected += (Node node) => { ConnectorView.Focus(node); };
+            ConnectorView.OnConnectionChange += () => rootVisualElement.UpdateDomainNotices(m_selectedDomain);
+            ConnectorView.OnAddNode += () => rootVisualElement.UpdateDomainNotices(m_selectedDomain);
         }
 
         private void ConnectUIElements()
         {
             rootVisualElement.Add(SplitView);
-            LeftPane.Add(DomainSelector);
-            LeftPane.Add(NodeValues);
+            LeftPane.Add(DomainEditorView);
             SplitView.Add(LeftPane);
             RightPane.Add(ConnectorView);
             SplitView.Add(RightPane);
         }
 
-        public void UpdateList()
+        private void DomainDeleted(string domainName)
         {
-            NodeValues.itemsSource = Domain.GetNodeNames(SelectedDomain);
-            NodeValues.Rebuild();
+            if (domainName.Equals(m_selectedDomain))
+            {
+                if (m_selectedDomain.Equals(Domain.GetAll()[0]))
+                {
+                    m_selectedDomain = Domain.GetAll()[1];
+                }
+                else
+                {
+                    m_selectedDomain = Domain.GetAll()[0];
+                }
+            }
         }
+
         public void UpdateConnector()
         {
-            ConnectorView.LoadDomain(SelectedDomain);
+            ConnectorView.LoadDomain(m_selectedDomain);
         }
     }
 }
