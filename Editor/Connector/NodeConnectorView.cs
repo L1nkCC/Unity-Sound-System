@@ -60,6 +60,12 @@ namespace CC.SoundSystem.Editor
                 (
                     menuEvent => 
                     {
+                        GraphNode target = null;
+                        if (menuEvent.target is GraphNode) target = menuEvent.target as GraphNode;
+                        menuEvent.menu.ClearItems();
+                        
+                        if (menuEvent.target is GraphNode) menuEvent.menu.AppendAction("Delete Node", actionEvent => Debug.Log(target.Node.name));
+
                         menuEvent.menu.AppendAction("Add Node", actionEvent => CreateGraphNodeWindow.CreateInstance(this)); 
                     }
                 );
