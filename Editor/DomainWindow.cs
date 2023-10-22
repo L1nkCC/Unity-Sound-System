@@ -26,7 +26,7 @@ namespace CC.SoundSystem.Editor
         }
 
         //tabs
-        int m_tabSelected = 0;
+        int m_tabSelected = (int) DomainWindowType.Content;
         static readonly string[] TAB_OPTIONS = System.Enum.GetNames(typeof(DomainWindowType));
 
         //windows organized for internal use
