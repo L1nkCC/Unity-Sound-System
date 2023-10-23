@@ -22,6 +22,7 @@ namespace CC.SoundSystem.Editor
         public Port ParentPort { get; protected set; }
         public Port ChildrenPort { get; protected set; }
 
+        //Used For placing nodes
         public static int BASE_WIDTH = 600;
         public static int BASE_HEIGHT = 300;
 

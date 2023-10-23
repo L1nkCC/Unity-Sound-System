@@ -5,7 +5,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/20/2023
-    /// Last Edited: 10/20/2023
+    /// Last Edited: 10/22/2023
     /// 
     /// <summary>
     /// Window for displaying Content inside a domain
@@ -23,6 +23,7 @@ namespace CC.SoundSystem.Editor
         //Callbacks
         public System.Action<Node> OnNodeSelected = (Node node) => { };
         public System.Action<string> OnDomainSelectionChange = (string domainName) => { };
+        public System.Action OnSort = () => { };
 
         /// <summary>
         /// Generic Setup
@@ -56,14 +57,15 @@ namespace CC.SoundSystem.Editor
                 m_selectedDomainIndex = newSelectedDomainIndex;
                 OnDomainSelectionChange(SelectedDomain);
             }
+            if (GUILayout.Button("Sort", GUILayout.Width(50))) OnSort();
             EditorGUILayout.EndHorizontal();
             GUILayout.Space(20);
             EditorGUILayout.LabelField("Nodes");
             foreach(Node node in Nodes)
             {
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(node.name);
-                if (GUILayout.Button("Focus")) OnNodeSelected(node);
+                EditorGUILayout.LabelField(node.name, GUILayout.MinWidth(100));
+                if (GUILayout.Button("Focus", GUILayout.MaxWidth(150))) OnNodeSelected(node);
                 GUILayout.EndHorizontal();
             }
         }

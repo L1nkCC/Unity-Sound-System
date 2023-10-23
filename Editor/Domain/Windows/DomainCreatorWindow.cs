@@ -5,7 +5,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: Connor Leslie
     /// Created: 10/20/2023
-    /// Last Edited: 10/20/2023
+    /// Last Edited: 10/22/2023
     /// 
     /// <summary>
     /// Creation Window for SoundSystem Domains
@@ -36,7 +36,7 @@ namespace CC.SoundSystem.Editor
         /// </summary>
         public void OnGUI()
         {
-            GUILayout.Label("Create Sound Domain", Core.Utilities.GUI.Styles.Title);
+            GUILayout.Label("Create Domain", Core.Utilities.GUI.Styles.Title);
             GUILayout.Space(10);
             DrawCreationWidget();
             m_serialized.ApplyModifiedProperties();

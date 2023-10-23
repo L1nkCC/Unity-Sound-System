@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using CC.Core.Utilities.IO;
@@ -11,11 +9,25 @@ using System.Linq;
 
 namespace CC.SoundSystem.Editor
 {
+    /// Author: L1nkCC
+    /// Created: 10/22/2023
+    /// Last Edited: 10/22/2023
+    /// 
+    /// <summary>
+    /// A GraphView optimized for GraphNode. This allows for easy manipulation of GraphNodes
+    /// </summary>
     public class NodeConnectorView : GraphView, IDomain
     {
+        public new class UxmlFactory : UxmlFactory<NodeConnectorView, UxmlTraits> { }
+
+        //Callbacks
         public System.Action OnConnectionChange = ()=> { };
         public System.Action OnAddNode = () => { };
+
+        //domain loaded currently
         private string m_selectedDomain;
+        
+        //Easy accessors
         protected IEnumerable<GraphNode> GraphNodes { 
             get 
             {
@@ -24,9 +36,8 @@ namespace CC.SoundSystem.Editor
                     ).Cast<GraphNode>();
             } 
         }
+        GraphNode[] Roots => GraphNodes.Where(node => node.Node.IsRoot).ToArray();
 
-
-        public new class UxmlFactory : UxmlFactory<NodeConnectorView, UxmlTraits> { }
 
         /// <summary>
         /// Contructor
@@ -44,6 +55,9 @@ namespace CC.SoundSystem.Editor
         }
 
 
+        /// <summary>
+        /// Add necessary Manipulators to GraphView so it works as intended
+        /// </summary>
         private void AddManipulators()
         {
             this.AddManipulator(new ContentZoomer());
@@ -116,9 +130,14 @@ namespace CC.SoundSystem.Editor
             {
                 AddElement(nodes[i]);
             }
-            PlaceNodes(nodes);
+            PlaceNodes();
         }
 
+        /// <summary>
+        /// Find a GraphNode on the View that wraps the Passed Node
+        /// </summary>
+        /// <param name="node">Node to find wrapped pairing for</param>
+        /// <returns>The GraphNode on the view that wraps the node passed or null if there is no GraphNode that does that</returns>
         private GraphNode GetCorrespondingGraphNode(Node node)
         {
             foreach (GraphNode graphNode in GraphNodes)
@@ -130,13 +149,22 @@ namespace CC.SoundSystem.Editor
             }
             return null;
         }
+        /// <summary>
+        /// Position the View Camera over the Graphnode that wraps the passed Node. Will do nothing if there is no corresponding graphnode to passed node
+        /// </summary>
+        /// <param name="node">Node to focus on</param>
         public void Focus(Node node)
         {
             GraphNode graphNode = GetCorrespondingGraphNode(node);
             if (graphNode == null) return;
             Focus(graphNode);
         }
-        public void Focus(GraphElement graphElement)
+
+        /// <summary>
+        /// Position View Camera over graph Element
+        /// </summary>
+        /// <param name="graphElement">Element to place camera infront of</param>
+        private void Focus(GraphElement graphElement)
         {
             Vector3 newPosition = new Vector3(-graphElement.GetPosition().x, -graphElement.GetPosition().y, graphElement.transform.position.z) +//put node at top left corner
                 new Vector3(viewport.contentRect.width/2 - graphElement.contentRect.width/2, viewport.contentRect.height/2 - graphElement.contentRect.height/2); // position in center
@@ -144,8 +172,10 @@ namespace CC.SoundSystem.Editor
             graphElement.Focus();
         }
 
-
-        public void PlaceNodes(GraphNode[] nodes)
+        /// <summary>
+        /// Organize Nodes and place them according to the order they would be found in a Breadth First Search
+        /// </summary>
+        public void PlaceNodes()
         {
             static void position(GraphNode node, int level, int depth)
             {
@@ -153,13 +183,13 @@ namespace CC.SoundSystem.Editor
                 float x = depth * GraphNode.BASE_WIDTH;
                 node.SetPosition(x, y);
             }
-            GraphNode[] roots = nodes.Where(node => node.Node.IsRoot).ToArray();
+            
             HashSet<GraphNode> visited = new();
             int level = 0;
-            for(int iroot =0; iroot < roots.Length; iroot++)
+            for(int iroot =0; iroot < Roots.Length; iroot++)
             {
                 Stack<(GraphNode, int)> stack = new(); //hold graphnode and current depth for that node
-                stack.Push((roots[iroot], 0));
+                stack.Push((Roots[iroot], 0));
                 while(stack.Count != 0)
                 {
                     (GraphNode currNode, int depth) = stack.Pop();
@@ -184,17 +214,29 @@ namespace CC.SoundSystem.Editor
             }
         }
 
+        /// <summary>
+        /// Delete graphnodes from the domain as well as the graph view
+        /// </summary>
+        /// <param name="graphNodes">GraphNodes to Delete</param>
         private void DeleteGraphNodes(IEnumerable<GraphNode> graphNodes)
         {
             foreach (GraphNode graphNode in graphNodes)
                 DeleteGraphNode(graphNode);
         }
+        /// <summary>
+        /// Delete a graphnode from the domain as well as the graph view
+        /// </summary>
+        /// <param name="graphNode">GraphNode to delete</param>
         private void DeleteGraphNode(GraphNode graphNode)
         {
             base.RemoveElement(graphNode);
             Domain.DeleteNode(m_selectedDomain, graphNode.Node);
         }
 
+        /// <summary>
+        /// Remove Element from Graph. Will safely remove GraphNodes and maintain their relationships
+        /// </summary>
+        /// <param name="ge">Graph Element to remove</param>
         public new void RemoveElement(GraphElement ge)
         {
             if(ge.GetType() == typeof(GraphNode))
@@ -203,6 +245,10 @@ namespace CC.SoundSystem.Editor
             }
             base.RemoveElement(ge);
         }
+        /// <summary>
+        /// Add Element to Graph. Will Load GraphNode with its connections and assign callbacks and call OnAddNode callback
+        /// </summary>
+        /// <param name="ge">Graph Element to add</param>
         public new void AddElement(GraphElement ge)
         {
             base.AddElement(ge);
@@ -215,7 +261,12 @@ namespace CC.SoundSystem.Editor
                 OnAddNode();
             }
         }
-
+        /// <summary>
+        /// Create a New GraphNode and Add it to the View. Will make a corresponding Node and add it to the domain
+        /// </summary>
+        /// <param name="nodeName">New node's name</param>
+        /// <param name="parent">Parent of the node to be created</param>
+        /// <returns>Newly created and added GraphNode</returns>
         public GraphNode AddNewGraphNode(string nodeName, Node parent = null)
         {
             GraphNode graphNode = new GraphNode(Node.CreateInstance(nodeName));

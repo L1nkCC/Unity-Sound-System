@@ -7,7 +7,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/20/2023
-    /// Last Edited: 10/20/2023
+    /// Last Edited: 10/22/2023
     /// 
     /// <summary>
     /// A tabbed menu for all Domain Commands
@@ -37,15 +37,6 @@ namespace CC.SoundSystem.Editor
         public DomainDeletorWindow Deletor => windows[(int)DomainWindowType.Deletor] as DomainDeletorWindow;
         public DomainContentWindow Content => windows[(int)DomainWindowType.Content] as DomainContentWindow;
 
-
-        /// <summary>
-        /// Allow for creation through tool bar
-        /// </summary>
-        [MenuItem("Window/CC/Sound System/Domain Editor")]
-        public static void CreateWindow()
-        {
-            GetWindow<DomainWindow>();
-        }
         /// <summary>
         /// Generic Setup
         /// </summary>

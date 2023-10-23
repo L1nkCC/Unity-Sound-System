@@ -5,7 +5,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/20/203
-    /// Last Edited: 10/20/2023
+    /// Last Edited: 10/22/2023
     /// 
     /// <summary>
     /// Window for Deletion of a Domain
@@ -36,7 +36,7 @@ namespace CC.SoundSystem.Editor
         /// </summary>
         public void OnGUI()
         {
-            GUILayout.Label("Delete Sound Domain", Core.Utilities.GUI.Styles.Title);
+            GUILayout.Label("Delete Domain", Core.Utilities.GUI.Styles.Title);
             GUILayout.Space(10);
             DrawDeletionWidget();
             m_serialized.ApplyModifiedProperties();
