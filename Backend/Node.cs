@@ -9,7 +9,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/21/2023
+    /// Last Edited: 10/22/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -91,6 +91,15 @@ namespace CC.SoundSystem
                 parent = parent.m_parent;
             }
             return typeMultiplier;
+        }
+
+        /// <summary>
+        /// Set Multiplier Value to passed value if it is Between 0 and 1. Else no change
+        /// </summary>
+        /// <param name="multiplier">New Multiplier value</param>
+        public void SetMultiplier(float multiplier)
+        {
+            m_multiplier = multiplier <= MAX_MULTIPLIER && multiplier >= MIN_MULTIPLIER ? multiplier : m_multiplier;
         }
 
 
