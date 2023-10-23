@@ -1,0 +1,16 @@
+{
+    "name": "CC.SoundSystem",
+    "rootNamespace": "CC.SoundSystem",
+    "references": [
+        "GUID:71e5befdef843394e8e8af39afeb422c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

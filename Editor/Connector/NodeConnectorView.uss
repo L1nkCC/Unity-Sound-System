@@ -1,0 +1,11 @@
+GridBackground {
+	--grid-background-color: #2a2a2a;
+	--line-color: #232323;
+	--thick-line-color: #191919;
+	--spacing: 30;
+}
+GraphNode
+{
+	opacity: 1;
+	background-color: #212121;
+}
