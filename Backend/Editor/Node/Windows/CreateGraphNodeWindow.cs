@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEditor;
 namespace CC.SoundSystem.Editor
 {
+    /// Author: L1nkCC
+    /// Created: 10/23/2023
+    /// Last Edited: 10/23/2023
+    /// 
     /// <summary>
     /// A Window to create a GraphNode into an accepting Window
     /// </summary>
@@ -67,15 +71,16 @@ namespace CC.SoundSystem.Editor
             m_newNodeName = EditorGUILayout.TextField(m_newNodeName);
             EditorGUILayout.EndHorizontal();
 
+            m_serialized.ApplyModifiedProperties();
             EditorGUI.BeginDisabledGroup(!InputValidation());
             if(GUILayout.Button("Create Node")) 
             {
                 m_connectorView.AddNewGraphNode(m_newNodeName, SelectedParent);
+                m_serialized.ApplyModifiedProperties();
                 this.Close();
             };
             EditorGUI.EndDisabledGroup();
 
-            m_serialized.ApplyModifiedProperties();
         }
 
         /// <summary>

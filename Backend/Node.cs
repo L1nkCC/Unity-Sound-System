@@ -9,7 +9,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/22/2023
+    /// Last Edited: 10/23/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -31,6 +31,8 @@ namespace CC.SoundSystem
         //Public accessors
         public Node Parent => m_parent;
         public bool IsRoot => m_parent == null;
+
+        public List<Node> Children { get { return m_children; } }
 
         /// <summary>
         /// Allow for easy creation of nodes as Scriptable Objects

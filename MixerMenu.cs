@@ -1,50 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 namespace CC.SoundSystem
 {
     [RequireComponent(typeof(RectTransform))]
-    public class MixerMenu : MonoBehaviour
+    public class MixerMenu : GridLayoutGroup
     {
         [SerializeField] string m_selectedDomain;
-        [SerializeField] VolumeSlider m_volumeSliderPrefab;
-        [SerializeField] float m_verticalPadding = 20f;
-        [SerializeField] float m_horizontalPadding = 20f;
-
+        [SerializeField] public VolumeSlider m_volumeSliderPrefab;
 
         RectTransform GetRectTransform() { return this.transform as RectTransform; }
-
-        private void Awake()
+        protected override void OnValidate()
         {
-            SpawnMenu();
+            if(m_volumeSliderPrefab != null)
+                cellSize = (m_volumeSliderPrefab.transform as RectTransform).rect.size;
         }
 
-        private void SpawnMenu()
+        public void UpdateMenu(Node root = null)
         {
-            Node[] nodes = Editor.Domain.GetNodes(m_selectedDomain);
-            float width = (m_volumeSliderPrefab.transform as RectTransform).rect.width;
-            float height = (m_volumeSliderPrefab.transform as RectTransform).rect.height;
-            int verticalCapacity = (int) (GetRectTransform().rect.height / (height + m_verticalPadding));
-            int horizontalCapacity = (int) (GetRectTransform().rect.width / (width + m_horizontalPadding));
-            
-            if(horizontalCapacity*verticalCapacity < nodes.Length)
-            {
-                throw new MenuBuilderUtilities.MenuComponentException("Not enough Space for all Nodes in domain");
-            }
+            if (root == null)
+                root = Editor.Domain.GetRoot(m_selectedDomain);
+            ClearChildren();
+            SpawnMenu(root);
+        }
 
-            for(int row =0; row < horizontalCapacity; row++)
-                for(int col = 0; col < verticalCapacity; col++)
+        private void SpawnMenu(Node root)
+        {
+            VolumeSlider rootSlider = ConstructSlider(root);
+            rootSlider.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            rootSlider.transform.position = Vector3.zero;
+            for (int nodeIndex = 0; nodeIndex < root.Children.Count; nodeIndex++)
+            {
+                ConstructSlider(root.Children[nodeIndex]);
+            }
+        }
+        private void ClearChildren()
+        {
+            System.Action Destroy = () => { };
+            foreach(Transform child in transform)
+            {
+                Destroy += () =>
                 {
-                    if (nodes.Length > col + (row * verticalCapacity))
-                    {
-                        Node nodeToConnect = nodes[col + (row * verticalCapacity)];
-                        Vector3 position = new Vector3(row * (width + m_horizontalPadding), col * (height + m_verticalPadding));
-                        Debug.Log(nodeToConnect.name + "  " + row * (width + m_horizontalPadding) + "    h: " + col * (height + m_verticalPadding));
-                        VolumeSlider slider = Instantiate(m_volumeSliderPrefab, position, new Quaternion(), GetRectTransform());
-                        slider.ConnectNode(nodeToConnect);
-                    }
-                }
+                    if (this.transform != child)
+                        DestroyImmediate(child.gameObject);
+                };
+            }
+            Destroy();
+        }
+        
+        private VolumeSlider ConstructSlider(Node node)
+        {
+            VolumeSlider slider = Instantiate(m_volumeSliderPrefab, GetRectTransform());
+            slider.ConnectNode(node);
+            slider.name = slider.node.name + " Volume Slider";
+            return slider;
         }
     }
 }
