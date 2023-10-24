@@ -13,7 +13,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/22/2023
-    /// Last Edited: 10/22/2023
+    /// Last Edited: 10/24/2023
     /// 
     /// <summary>
     /// Window for All Sound System Editing
@@ -31,7 +31,7 @@ namespace CC.SoundSystem.Editor
         DomainWindow DomainEditorWindow;
 
         //Currently selected Domain
-        string m_selectedDomain = Domain.GetAll()[0];
+        string m_selectedDomain;
 
         /// <summary>
         /// Allow For creation through Unity Tool bar
@@ -65,6 +65,7 @@ namespace CC.SoundSystem.Editor
         /// </summary>
         private void Init()
         {
+            m_selectedDomain = Domain.GetAll()[0];
             InitElements();
             InitCallbacks();
         }

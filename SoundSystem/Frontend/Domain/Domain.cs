@@ -20,15 +20,20 @@ namespace CC.SoundSystem
         static readonly string path = FileLocation.Directory + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
 
-
         #region Getters
         /// <summary>
-        /// Returns all the names of domains
+        /// Returns all the names of domains. If there are no domains, create a default
         /// </summary>
         /// <returns>All Domain names</returns>
         public static string[] GetAll()
         {
+            IO.AssureDirectory(path);
             string[] paths = Directory.GetDirectories(path);
+            if (paths.Length == 0) 
+            { 
+                CreateDefaultDomain();
+                paths = Directory.GetDirectories(path);
+            }
             for (int i = 0; i < paths.Length; i++)
                 paths[i] = Path.GetRelativePath(path,paths[i]);
             return paths;
@@ -114,6 +119,7 @@ namespace CC.SoundSystem
         /// <param name="nodeNames">Names of Nodes to be created</param>
         public static void CreateDomain(string domainName, string[] nodeNames)
         {
+            IO.AssureDirectory(path);
             ValidateInputs(domainName, nodeNames);
             Directory.CreateDirectory(path + domainName);
 
@@ -122,6 +128,7 @@ namespace CC.SoundSystem
                 Node node = Node.CreateInstance(nodeName);
                 AddNode(domainName, node);
             }
+            DomainEnumWriter.CreateDomainEnum(domainName);
         }
 
         /// <summary>
@@ -143,6 +150,7 @@ namespace CC.SoundSystem
                 AddNode(domainName, UI);
                 AddNode(domainName, PlayerActions);
                 AddNode(domainName, EntityActions);
+                DomainEnumWriter.CreateDomainEnum(domainName);
             }catch(InputValidationException e)
             {
                 throw new ApplicationException("Cannot Delete Default Domain if it is the only domain that exists. \n"+e.Message);
@@ -162,6 +170,15 @@ namespace CC.SoundSystem
                 CreateDefaultDomain();
             }
             AssetDatabase.DeleteAsset((path + domainName).GetRelativeUnityPath());
+            DomainEnumWriter.DeleteDomainEnum(domainName);
+        }
+
+        public static void LoadDomain(DomainSaveUtilities.DomainSave loadDomain)
+        {
+            if (Domain.GetAll().Contains(loadDomain.Name))
+            {
+
+            }
         }
 
         #endregion

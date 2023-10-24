@@ -5,7 +5,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/20/2023
-    /// Last Edited: 10/22/2023
+    /// Last Edited: 10/24/2023
     /// 
     /// <summary>
     /// Window for displaying Content inside a domain
@@ -59,9 +59,12 @@ namespace CC.SoundSystem.Editor
             }
             if (GUILayout.Button("Sort", GUILayout.Width(50))) OnSort();
             EditorGUILayout.EndHorizontal();
-            GUILayout.Space(20);
-            EditorGUILayout.LabelField("Nodes", EditorStyles.boldLabel);
 
+            if (GUILayout.Button(new GUIContent("Update Enumerated Type"))) { DomainSaveUtilities.SaveAllDomains(); }// DomainEnumWriter.CreateDomainEnum(SelectedDomain); }
+
+            GUILayout.Space(20);
+
+            EditorGUILayout.LabelField("Nodes", EditorStyles.boldLabel);
             void DrawNode(Node node, int level, int depth)
             {
                 EditorGUI.indentLevel = depth;
