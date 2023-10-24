@@ -13,7 +13,7 @@ namespace CC.SoundSystem
     [RequireComponent(typeof(RectTransform))]
     public class MixerMenu : UIBehaviour
     {
-        [SerializeField] string m_selectedDomain;
+        [SerializeField] string m_selectedDomain = Domain.GetAll()[0];
         [SerializeField] public VolumeSlider m_volumeSliderPrefab;
         [SerializeField] public GameObject m_layout;
 
@@ -25,7 +25,7 @@ namespace CC.SoundSystem
         public void SetCellSize()
         {
             GridLayoutGroup gridLayoutGroup;
-            if (m_volumeSliderPrefab != null && m_layout.TryGetComponent<GridLayoutGroup>(out gridLayoutGroup))
+            if (m_volumeSliderPrefab != null && m_layout != null && m_layout.TryGetComponent<GridLayoutGroup>(out gridLayoutGroup))
                 gridLayoutGroup.cellSize = (m_volumeSliderPrefab.transform as RectTransform).rect.size;
         }
 
@@ -45,6 +45,8 @@ namespace CC.SoundSystem
             ClearMenu();
             CreateMenuHolder();
             SpawnMenu(root);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(this.transform as RectTransform);
         }
 
         /// <summary>
@@ -68,9 +70,7 @@ namespace CC.SoundSystem
             {
                 m_layout = new GameObject("Menu Holder", typeof(GridLayoutGroup));
                 m_layout.transform.SetParent(this.transform,false);
-                (m_layout.transform as RectTransform).anchorMin = (transform as RectTransform).anchorMin;
-                (m_layout.transform as RectTransform).anchorMax = (transform as RectTransform).anchorMax;
-                (m_layout.transform as RectTransform).anchoredPosition = (transform as RectTransform).anchoredPosition;
+                (m_layout.transform as RectTransform).Fill();
                 (m_layout.transform as RectTransform).sizeDelta = (transform as RectTransform).sizeDelta - new Vector2(0, 2*(m_volumeSliderPrefab.transform as RectTransform).rect.height);
             }
         }
