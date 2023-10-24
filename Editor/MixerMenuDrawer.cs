@@ -1,52 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.UI;
-using UnityEditor.UI;
 using UnityEngine.UIElements;
 
 namespace CC.SoundSystem.Editor
 {
     [CustomEditor(typeof(MixerMenu))]
     [CanEditMultipleObjects]
-    public class MixerMenuEditor : GridLayoutGroupEditor
+    public class MixerMenuEditor : UnityEditor.Editor
     {
-        SerializedProperty m_selectedDomain;
 
         int m_selectedDomainIndex;
         System.Action OnSelectedDomainChange = () => { };
 
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            m_selectedDomain = serializedObject.FindProperty("m_selectedDomain");
-        }
+        string SelectedDomain => Domain.GetAll()[m_selectedDomainIndex];
 
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement rootElement = new VisualElement();
             rootElement.Add(new IMGUIContainer(Draw));
-            OnSelectedDomainChange += () => DomainNoticeHandler.UpdateDomainNotices(rootElement,m_selectedDomain.stringValue);
+            OnSelectedDomainChange += () => DomainNoticeHandler.UpdateDomainNotices(rootElement,SelectedDomain);
             return rootElement;
         }
 
         public void Draw()
         {
             GUILayout.BeginHorizontal();
-            int tmpIndex = EditorGUILayout.Popup(m_selectedDomainIndex, Domain.GetAll());
+            int tmpIndex = EditorGUILayout.Popup(new GUIContent("Target Domain", "Domain the menu will be referencing"),m_selectedDomainIndex, Domain.GetAll());
             if (tmpIndex != m_selectedDomainIndex)
             {
                 m_selectedDomainIndex = tmpIndex;
-                m_selectedDomain.stringValue = Domain.GetAll()[tmpIndex];
                 serializedObject.ApplyModifiedProperties();
-                (target as MixerMenu).UpdateMenu();
+                (target as MixerMenu).UpdateMenu(SelectedDomain);
                 OnSelectedDomainChange();
             }
-            if (GUILayout.Button("Refresh Domain")) (target as MixerMenu).UpdateMenu();
+            if (GUILayout.Button(new GUIContent("Refresh Domain", "Reset Menu and reload all children of Menu"))) (target as MixerMenu).UpdateMenu();
             GUILayout.EndHorizontal();
-            (target as MixerMenu).m_volumeSliderPrefab = EditorGUILayout.ObjectField((target as MixerMenu).m_volumeSliderPrefab, typeof(VolumeSlider), false) as VolumeSlider;
-            base.OnInspectorGUI();
+            (target as MixerMenu).m_volumeSliderPrefab = EditorGUILayout.ObjectField(new GUIContent("Volume Slider", "Slider Prefab to use in Menu Construction"),(target as MixerMenu).m_volumeSliderPrefab, typeof(VolumeSlider), false) as VolumeSlider;
+            (target as MixerMenu).m_layout = EditorGUILayout.ObjectField(new GUIContent("Menu Holder", "Contains all sliders that are a child of Root"),(target as MixerMenu).m_layout, typeof(GameObject), true) as GameObject;
+            (target as MixerMenu).SetCellSize();
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

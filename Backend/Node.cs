@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace CC.SoundSystem
 {
-
     /// Author: L1nkCC
     /// Created: 10/13/2023
-    /// Last Edited: 10/23/2023
+    /// Last Edited: 10/24/2023
     /// <summary>
     /// Holds information for each sound designation for easy manipulation by game developers
     /// </summary>
@@ -27,12 +26,15 @@ namespace CC.SoundSystem
         [SerializeField] private List<AudioClip> m_clips = new();
         [SerializeField] private float m_multiplier = 1;//should stay between 0:1
         [SerializeField] private bool m_muted = false;
+        //MenuControls
+        [SerializeField] private bool m_expandable = true;
 
         //Public accessors
         public Node Parent => m_parent;
         public bool IsRoot => m_parent == null;
-
         public List<Node> Children { get { return m_children; } }
+        public float Multiplier => m_multiplier;
+        public bool Expandable => m_expandable;
 
         /// <summary>
         /// Allow for easy creation of nodes as Scriptable Objects

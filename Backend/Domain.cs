@@ -5,19 +5,19 @@ using System;
 using CC.Core.Utilities.IO;
 using CC.Core.InputValidation;
 
-namespace CC.SoundSystem.Editor
+namespace CC.SoundSystem
 {
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/23/2023
+    /// Last Edited: 10/24/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
     /// </summary>
     public static class Domain
     {
-        static readonly string path = Directory.GetParent(Directory.GetParent(FileLocation.Directory).FullName).FullName + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
+        static readonly string path = FileLocation.Directory + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
 
 
