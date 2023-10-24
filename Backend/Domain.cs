@@ -5,19 +5,19 @@ using System;
 using CC.Core.Utilities.IO;
 using CC.Core.InputValidation;
 
-namespace CC.SoundSystem.Editor
+namespace CC.SoundSystem
 {
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/21/2023
+    /// Last Edited: 10/24/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
     /// </summary>
     public static class Domain
     {
-        static readonly string path = Directory.GetParent(Directory.GetParent(FileLocation.Directory).FullName).FullName + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
+        static readonly string path = FileLocation.Directory + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
 
 
@@ -47,6 +47,18 @@ namespace CC.SoundSystem.Editor
                 nodes[i] = (AssetDatabase.LoadAssetAtPath(nodePaths[i].GetRelativeUnityPath(), typeof(Node)) as Node);
             }
             return nodes;
+        }
+
+        /// <summary>
+        /// Get root of domain
+        /// </summary>
+        /// <param name="domainName">Domain to search</param>
+        /// <returns>Root node for domain. If it is not well defined/has only one, then this will return the first one it finds and null if the domain is empty</returns>
+        public static Node GetRoot(string domainName)
+        {
+            Node[] nodes = GetNodes(domainName);
+            if (nodes.Length == 0) return null;
+            return nodes.Where(node => node.IsRoot).ToArray()[0];
         }
 
         /// <summary>

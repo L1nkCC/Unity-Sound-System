@@ -8,7 +8,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/14/2023
-    /// Last Edited: 10/19/2023
+    /// Last Edited: 10/24/2023
     /// 
     /// <summary>
     /// Custom Drawer for the CC.SoundSystem.Node
@@ -26,10 +26,12 @@ namespace CC.SoundSystem.Editor
         SerializedProperty m_clips;
         SerializedProperty m_multiplier;
         SerializedProperty m_muted;
+        SerializedProperty m_expandable;
 
         //Drawer status
         bool m_rootPathFolderStatus = false;
         bool m_childrenFolderStatus = false;
+        bool m_menuControlsFolderStatus = false;
 
         /// <summary>
         /// Intialize serialized refrences
@@ -41,6 +43,7 @@ namespace CC.SoundSystem.Editor
             m_clips = serializedObject.FindProperty("m_clips");
             m_multiplier = serializedObject.FindProperty("m_multiplier");
             m_muted = serializedObject.FindProperty("m_muted");
+            m_expandable = serializedObject.FindProperty("m_expandable");
         }
 
         /// <summary>
@@ -49,8 +52,8 @@ namespace CC.SoundSystem.Editor
         public override void OnInspectorGUI()
         {
             DrawRelationships();
+            DrawMenuControls();
             DrawVolumeDetails();
-            
             
             //Clip Details
             CC.Core.Utilities.GUI.Layout.DisplayArray(m_clips);
@@ -76,6 +79,19 @@ namespace CC.SoundSystem.Editor
             m_muted.boolValue = EditorGUILayout.Toggle(m_muted.boolValue, GUILayout.Width(20));
             EditorGUILayout.EndHorizontal();
             EditorGUI.ProgressBar(GUILayoutUtility.GetRect(18, 18, "TextField"), (serializedObject.targetObject as Node).GetVolume(), "Volume");
+        }
+
+        /// <summary>
+        /// Draw details concerning Menu Controls
+        /// </summary>
+        private void DrawMenuControls()
+        {
+            m_menuControlsFolderStatus = EditorGUILayout.BeginFoldoutHeaderGroup(m_menuControlsFolderStatus, "Menu Controls");
+            if (m_menuControlsFolderStatus)
+            {
+                EditorGUILayout.PropertyField(m_expandable);
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
 
         /// <summary>
