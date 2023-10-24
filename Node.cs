@@ -31,6 +31,7 @@ namespace CC.SoundSystem
         //Public accessors
         public Node Parent => m_parent;
         public bool IsRoot => m_parent == null;
+        public List<Node> Children => m_children;
 
         /// <summary>
         /// Allow for easy creation of nodes as Scriptable Objects
@@ -92,7 +93,6 @@ namespace CC.SoundSystem
             }
             return typeMultiplier;
         }
-
 
         #region Child related Operations
         /// <summary>

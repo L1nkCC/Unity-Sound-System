@@ -1,6 +1,6 @@
 using UnityEditor;
 using UnityEngine;
-
+using System.Linq;
 namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
@@ -60,14 +60,19 @@ namespace CC.SoundSystem.Editor
             if (GUILayout.Button("Sort", GUILayout.Width(50))) OnSort();
             EditorGUILayout.EndHorizontal();
             GUILayout.Space(20);
-            EditorGUILayout.LabelField("Nodes");
-            foreach(Node node in Nodes)
+            EditorGUILayout.LabelField("Nodes", EditorStyles.boldLabel);
+
+            void DrawNode(Node node, int level, int depth)
             {
+                EditorGUI.indentLevel = depth;
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(node.name, GUILayout.MinWidth(100));
                 if (GUILayout.Button("Focus", GUILayout.MaxWidth(150))) OnNodeSelected(node);
                 GUILayout.EndHorizontal();
+                EditorGUI.indentLevel = 0;
             }
+
+            NodeUtilities.ForEachChildDepthFirst(Nodes.Where(node => node.IsRoot),DrawNode);
         }
 
     }

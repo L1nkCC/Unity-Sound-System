@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using CC.Core.Utilities.IO;
 using System.IO;
 using System.Linq;
+using CC.SoundSystem;
 
 namespace CC.SoundSystem.Editor
 {
@@ -173,45 +174,19 @@ namespace CC.SoundSystem.Editor
         }
 
         /// <summary>
-        /// Organize Nodes and place them according to the order they would be found in a Breadth First Search
+        /// Organize Nodes and place them according to the order they would be found in a Depth First Search
         /// </summary>
         public void PlaceNodes()
         {
-            static void position(GraphNode node, int level, int depth)
+            void position(Node node, int level, int depth)
             {
+                GraphNode graphNode = this.GetCorrespondingGraphNode(node);
                 float y = level * GraphNode.BASE_HEIGHT;
                 float x = depth * GraphNode.BASE_WIDTH;
-                node.SetPosition(x, y);
+                graphNode.SetPosition(x, y);
             }
+            NodeUtilities.ForEachChildDepthFirst(Roots.Select(node => node.Node), position);
             
-            HashSet<GraphNode> visited = new();
-            int level = 0;
-            for(int iroot =0; iroot < Roots.Length; iroot++)
-            {
-                Stack<(GraphNode, int)> stack = new(); //hold graphnode and current depth for that node
-                stack.Push((Roots[iroot], 0));
-                while(stack.Count != 0)
-                {
-                    (GraphNode currNode, int depth) = stack.Pop();
-                    if (!visited.Contains(currNode))
-                    {
-                        visited.Add(currNode);
-                        position(currNode, level, depth);
-                        GraphNode[] children = currNode.GetChildren();
-                        if(children.Length == 0)
-                        {
-                            level++;
-                        }
-                        else
-                        {
-                            foreach(GraphNode child in children)
-                            {
-                                stack.Push((child, depth + 1));
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         /// <summary>
