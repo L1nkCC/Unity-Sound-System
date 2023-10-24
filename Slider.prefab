@@ -332,9 +332,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0811284c0176a943842b7beca5e8b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_slider: {fileID: 6798369574697590331}
   m_label: {fileID: 3381427052029558227}
-  m_expandButton: {fileID: 0}
+  m_volumeSlider: {fileID: 6798369574697590331}
+  m_expandButton: {fileID: 3931611132989927302}
 --- !u!114 &8192592836154670306
 MonoBehaviour:
   m_ObjectHideFlags: 0
