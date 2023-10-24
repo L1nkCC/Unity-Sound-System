@@ -3,7 +3,10 @@ guid: 69d6b1569540ee1439efd8f27ca7c844
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_volumeSliderPrefab: {fileID: 4079301617489885579, guid: 952aa7ba0a7c8594092dd7926354908a,
+      type: 3}
+  - m_layout: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
