@@ -1,11 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 namespace CC.SoundSystem
 {
+    /// Author: L1nkCC
+    /// Created: 10/24/2023
+    /// Last Edited: 10/24/2023
+    /// 
+    /// <summary>
+    /// Utilities for MixerMenu
+    /// </summary>
     public static class MenuBuilderUtilities
     {
+        /// <summary>
+        /// Create a basic Mixer Menu
+        /// </summary>
         [UnityEditor.MenuItem("GameObject/CC/Mixer Menu")]
         public static void BuildMixerMenu()
         {
@@ -17,6 +25,11 @@ namespace CC.SoundSystem
             menu.UpdateMenu();
         }
 
+        /// <summary>
+        /// Fill a parent transform. 
+        /// NOTE: Must have a RectTransform Parent or error will be thrown
+        /// </summary>
+        /// <param name="child">Child to fill parent</param>
         public static void Fill(this RectTransform child)
         {
             if (child.parent.transform.GetType() != typeof(RectTransform)) return;

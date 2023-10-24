@@ -4,16 +4,31 @@ using UnityEngine.UIElements;
 
 namespace CC.SoundSystem.Editor
 {
+    /// Author: L1nkCC
+    /// Created: 10/24/2023
+    /// Last Edited: 10/24/203
+    /// 
+    /// <summary>
+    /// Editor For Mixer Menu
+    /// </summary>
     [CustomEditor(typeof(MixerMenu))]
     [CanEditMultipleObjects]
     public class MixerMenuEditor : UnityEditor.Editor
     {
 
+        //status
         int m_selectedDomainIndex;
+
+        //Callback
         System.Action OnSelectedDomainChange = () => { };
 
+        //Easy Accessor
         string SelectedDomain => Domain.GetAll()[m_selectedDomainIndex];
 
+        /// <summary>
+        /// Create Visual Element for Editor Display
+        /// </summary>
+        /// <returns>Editor Display in a Visual Element</returns>
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement rootElement = new VisualElement();
@@ -22,6 +37,9 @@ namespace CC.SoundSystem.Editor
             return rootElement;
         }
 
+        /// <summary>
+        /// Draw the Editor Display
+        /// </summary>
         public void Draw()
         {
             GUILayout.BeginHorizontal();
