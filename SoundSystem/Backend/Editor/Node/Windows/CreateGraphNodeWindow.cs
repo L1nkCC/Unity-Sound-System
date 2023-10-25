@@ -27,7 +27,7 @@ namespace CC.SoundSystem.Editor
         //Meta Selections
         string SelectedDomain => Domain.GetAll()[m_selectedDomainIndex];
         string[] NodeNamesInDomain => Domain.GetNodeNames(SelectedDomain);
-        Node SelectedParent => Domain.GetNodes(SelectedDomain)[m_selectedParentIndex];
+        Node SelectedParent => null;//Domain.GetNodes(SelectedDomain)[m_selectedParentIndex];
 
         /// <summary>
         /// Allow for the creation of this window with a reference with which to add the node

@@ -4,13 +4,14 @@ namespace CC.Core.Utilities.IO
 {
     /// Author: L1nkCC
     /// Created: 10/24/2023
-    /// Last Edited: 10/24/2023
+    /// Last Edited: 10/25/2023
     /// 
     /// <summary>
     /// Support for IO interactions
     /// </summary>
     public static class IO
     {
+        public static readonly string Resources = Path.GetFullPath(Application.dataPath)+ Path.AltDirectorySeparatorChar + "Resources";
         /// <summary>
         /// Get path relative to the Application.dataPath. AKA: the asset folder
         /// </summary>

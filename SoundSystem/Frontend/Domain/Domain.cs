@@ -10,14 +10,14 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/24/2023
+    /// Last Edited: 10/25/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
     /// </summary>
     public static class Domain
     {
-        static readonly string path = FileLocation.Directory + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
+        static readonly string path = IO.Resources + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
         const string EXT = ".asset";
 
         #region Getters
@@ -30,7 +30,7 @@ namespace CC.SoundSystem
             IO.AssureDirectory(path);
             string[] paths = Directory.GetDirectories(path);
             if (paths.Length == 0) 
-            { 
+            {
                 CreateDefaultDomain();
                 paths = Directory.GetDirectories(path);
             }
@@ -121,8 +121,9 @@ namespace CC.SoundSystem
         {
             IO.AssureDirectory(path);
             ValidateInputs(domainName, nodeNames);
-            Directory.CreateDirectory(path + domainName);
-
+            UnityEngine.Debug.Log(path + domainName);
+            System.IO.Directory.CreateDirectory(path.GetRelativeUnityPath() + domainName);
+            AssetDatabase.Refresh();
             foreach (string nodeName in nodeNames)
             {
                 Node node = Node.CreateInstance(nodeName);
