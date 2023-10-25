@@ -17,7 +17,10 @@ namespace CC.SoundSystem
         [SerializeField] public VolumeSlider m_volumeSliderPrefab;
         [SerializeField] public GameObject m_layout;
 
-        private VolumeSlider m_rootSlider;
+        [SerializeField] public VolumeSlider m_rootSlider;
+
+        public string SelectedDomain => m_selectedDomain;
+
 
         /// <summary>
         /// Set the size of cells in the GridLayout Group
@@ -32,11 +35,10 @@ namespace CC.SoundSystem
         /// <summary>
         /// Update the menu to show nodes that are children of root and in the specified domain
         /// NOTE: passing no domainName will result in no domain change.
-        ///       passing no root will result in getting a root of the domain
         /// </summary>
         /// <param name="domainName">Domain to search</param>
         /// <param name="root">root to base Menu off</param>
-        public void UpdateMenu(string domainName = null, Node root = null)
+        public void UpdateMenu(Node root, string domainName = null)
         {
             if(domainName != null)
                 m_selectedDomain = domainName;
@@ -50,13 +52,22 @@ namespace CC.SoundSystem
         }
 
         /// <summary>
+        /// Update Menu from root of passed DomainName
+        /// </summary>
+        /// <param name="domainName">Domain to display</param>
+        public void UpdateMenu(string domainName)
+        {
+            UpdateMenu(Domain.GetRoot(domainName), domainName);
+        }
+
+        /// <summary>
         /// For Button Press Use. This will load the previous Menu/ the menu for the parent of the currently inspected node
         /// </summary>
         public void LoadParentMenu()
         {
             if (!m_rootSlider.Node.IsRoot)
             {
-                UpdateMenu(m_selectedDomain, m_rootSlider.Node.Parent);
+                UpdateMenu(m_rootSlider.Node.Parent);
             }
         }
 
@@ -83,7 +94,7 @@ namespace CC.SoundSystem
             ConstructRootSlider(root);
             for (int nodeIndex = 0; nodeIndex < root.Children.Count; nodeIndex++)
             {
-                ConstructSlider(root.Children[nodeIndex]);
+                VolumeSlider.CreateInstance(m_volumeSliderPrefab,root.Children[nodeIndex], m_layout);
             }
         }
         /// <summary>
@@ -91,12 +102,13 @@ namespace CC.SoundSystem
         /// </summary>
         private void ClearMenu()
         {
+            if (m_layout == null) return;
             System.Action Destroy = () => { };
-            foreach(Transform child in transform)
+            foreach(Transform child in m_layout.transform)
             {
                 Destroy += () =>
                 {
-                    if (this.transform != child)
+                    if (m_layout.transform != child)
                         DestroyImmediate(child.gameObject);
                 };
             }
@@ -112,33 +124,14 @@ namespace CC.SoundSystem
         /// <returns>A Volume Slider that is referencing root</returns>
         private VolumeSlider ConstructRootSlider(Node root)
         {
-            m_rootSlider = Instantiate(m_volumeSliderPrefab, this.transform);
-            m_rootSlider.ConnectNode(root);
+            if (m_rootSlider == null)
+                m_rootSlider = VolumeSlider.CreateInstance(m_volumeSliderPrefab, root, this.gameObject);
+            else
+                m_rootSlider.ConnectNode(root);
             m_rootSlider.name = m_rootSlider.Node.name + " Root Volume Slider";
-            LayoutElement rootElement = m_rootSlider.gameObject.AddComponent<LayoutElement>();
-            rootElement.minHeight = (m_rootSlider.transform as RectTransform).rect.height;
-            rootElement.preferredHeight = (m_rootSlider.transform as RectTransform).rect.height;
-            rootElement.flexibleHeight = (m_rootSlider.transform as RectTransform).rect.height;
-            rootElement.minWidth = (m_rootSlider.transform as RectTransform).rect.width;
-            rootElement.preferredWidth = (m_rootSlider.transform as RectTransform).rect.width;
-            rootElement.flexibleWidth = (m_rootSlider.transform as RectTransform).rect.width;
             m_rootSlider.transform.SetAsFirstSibling();
             return m_rootSlider;
         }
-
-        /// <summary>
-        /// Generic Constructor of a Slider in this menu
-        /// </summary>
-        /// <param name="node">Node the slider will be referencing</param>
-        /// <returns>Created VolumeSlider</returns>
-        private VolumeSlider ConstructSlider(Node node)
-        {
-            VolumeSlider slider = Instantiate(m_volumeSliderPrefab, m_layout.transform);
-            slider.ConnectNode(node);
-            slider.name = slider.Node.name + " Volume Slider";
-            slider.AddListener(() => UpdateMenu(m_selectedDomain, node));
-            return slider;
-        }
-        #endregion
+#endregion
     }
 }

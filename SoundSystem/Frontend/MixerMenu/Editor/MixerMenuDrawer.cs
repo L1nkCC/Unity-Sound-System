@@ -51,11 +51,12 @@ namespace CC.SoundSystem.Editor
                 (target as MixerMenu).UpdateMenu(SelectedDomain);
                 OnSelectedDomainChange();
             }
-            if (GUILayout.Button(new GUIContent("Refresh Domain", "Reset Menu and reload all children of Menu"))) (target as MixerMenu).UpdateMenu();
+            if (GUILayout.Button(new GUIContent("Refresh Domain", "Reset Menu and reload all children of Menu"))) (target as MixerMenu).UpdateMenu(SelectedDomain);
             GUILayout.EndHorizontal();
             (target as MixerMenu).m_volumeSliderPrefab = EditorGUILayout.ObjectField(new GUIContent("Volume Slider", "Slider Prefab to use in Menu Construction"),(target as MixerMenu).m_volumeSliderPrefab, typeof(VolumeSlider), false) as VolumeSlider;
             (target as MixerMenu).m_layout = EditorGUILayout.ObjectField(new GUIContent("Menu Holder", "Contains all sliders that are a child of Root"),(target as MixerMenu).m_layout, typeof(GameObject), true) as GameObject;
             (target as MixerMenu).SetCellSize();
+            (target as MixerMenu).m_rootSlider = EditorGUILayout.ObjectField(new GUIContent("Root Slider", "Slider Prefab to use in Menu Construction"),(target as MixerMenu).m_rootSlider, typeof(VolumeSlider), true) as VolumeSlider;
 
             serializedObject.ApplyModifiedProperties();
         }

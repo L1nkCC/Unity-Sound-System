@@ -173,14 +173,6 @@ namespace CC.SoundSystem
             DomainEnumWriter.DeleteDomainEnum(domainName);
         }
 
-        public static void LoadDomain(DomainSaveUtilities.DomainSave loadDomain)
-        {
-            if (Domain.GetAll().Contains(loadDomain.Name))
-            {
-
-            }
-        }
-
         #endregion
         #region Nodes
         /// <summary>

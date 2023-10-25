@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: PlayerActions
   m_EditorClassIdentifier: 
   m_parent: {fileID: 11400000, guid: e2871e4b45d5cd74f8939cca57b8cd54, type: 2}
-  m_children: []
+  m_children:
+  - {fileID: 11400000, guid: 03565dc343093a74a86fdb887af2850a, type: 2}
+  - {fileID: 11400000, guid: 5a50a49a0891aa045b9e171d73e54f42, type: 2}
   m_clips: []
   m_multiplier: 1
   m_muted: 0

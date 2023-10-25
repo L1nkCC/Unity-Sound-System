@@ -12,7 +12,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/22/2023
-    /// Last Edited: 10/22/2023
+    /// Last Edited: 10/25/2023
     /// 
     /// <summary>
     /// A GraphView optimized for GraphNode. This allows for easy manipulation of GraphNodes

@@ -22,7 +22,7 @@ namespace CC.SoundSystem
             MixerMenu menu = new GameObject("Mixer Menu", typeof(MixerMenu)).GetComponent<MixerMenu>();
             menu.transform.SetParent(canvas.transform);
             (menu.transform as RectTransform).Fill();
-            menu.UpdateMenu();
+            menu.UpdateMenu(Domain.GetAll()[0]);
         }
 
         /// <summary>

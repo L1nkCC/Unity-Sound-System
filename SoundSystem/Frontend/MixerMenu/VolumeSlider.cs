@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 namespace CC.SoundSystem
 {
     /// Author: L1nkCC
     /// Created: 10/24/2023
-    /// Last Edited: 10/24/2023
+    /// Last Edited: 10/25/2023
     /// 
     /// <summary>
     /// Slider to be used in CC.SoundSystem. Use this on a prefab for Mixer Menu. 
@@ -18,17 +19,31 @@ namespace CC.SoundSystem
         [Tooltip("Name of the sound type it is representing")][SerializeField] TextMeshProUGUI m_label;
         [Tooltip("Slider for manipulating Sound Mixing")][SerializeField] Slider m_volumeSlider;
         [Tooltip("Opens a menu with this soundtype as root")][SerializeField] Button m_expandButton;
-        public Node Node { get; private set; }
+        [SerializeField] public Node Node;
+        [SerializeField] MixerMenu m_menu;
 
         /// <summary>
-        /// AddListener to ExpandButton
+        /// Generic Constructor of a Slider in this menu
         /// </summary>
-        /// <param name="action">Action to append to ExpandButton's onClick</param>
-        public void AddListener(System.Action action)
+        /// <param name="node">Node the slider will be referencing</param>
+        /// <returns>Created VolumeSlider</returns>
+        public static VolumeSlider CreateInstance(VolumeSlider prefab, Node node, GameObject menu)
         {
-            if(m_expandButton != null)
-                m_expandButton.onClick.AddListener(() => action());
+            VolumeSlider slider = Instantiate(prefab, menu.transform);
+            slider.ConnectNode(node);
+            MixerMenu mixerMenu;
+            if(menu.TryGetComponent<MixerMenu>(out mixerMenu))
+            {
+                 slider.m_menu = mixerMenu;
+            }else if(menu.transform.parent.gameObject.TryGetComponent<MixerMenu>(out mixerMenu))
+            {
+                slider.m_menu = mixerMenu;
+            }
+            if (slider.m_menu != null && slider.m_expandButton != null) {slider.m_expandButton.onClick.AddListener(() => slider.m_menu.UpdateMenu(slider.Node)); }
+            slider.name = slider.Node.name + " Volume Slider";
+            return slider;
         }
+
         /// <summary>
         /// Reflect passed node in the slider
         /// </summary>
@@ -37,7 +52,7 @@ namespace CC.SoundSystem
         {
             Node = node;
             m_label.text = Node.name;
-            m_volumeSlider.value = Node != null ? Node.Multiplier : Node.MAX_MULTIPLIER;
+            SetSliderValues();
             if (m_expandButton != null) m_expandButton.enabled = Node.Expandable;
         }
 
@@ -56,9 +71,9 @@ namespace CC.SoundSystem
         /// </summary>
         private void SetSliderValues()
         {
+            m_volumeSlider.value = Node == null ? Node.MAX_MULTIPLIER : Node.Multiplier;
             m_volumeSlider.maxValue = Node.MAX_MULTIPLIER;
             m_volumeSlider.minValue = Node.MIN_MULTIPLIER;
-            m_volumeSlider.value = Node == null ? Node.MAX_MULTIPLIER : Node.Multiplier;
         }
 
         /// <summary>
@@ -67,7 +82,8 @@ namespace CC.SoundSystem
         private void Awake()
         {
             SetSliderValues();
-            m_volumeSlider.onValueChanged.AddListener(Node.SetMultiplier);
+            m_volumeSlider.onValueChanged.AddListener((float multiplier) => Node.SetMultiplier(multiplier));
+            if (m_menu != null && m_expandButton != null) { m_expandButton.onClick.AddListener(() => m_menu.UpdateMenu(Node)); }
         }
 
         /// <summary>

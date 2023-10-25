@@ -111,6 +111,8 @@ namespace CC.SoundSystem.Editor
             if (port.capacity != UnityEditor.Experimental.GraphView.Port.Capacity.Single) throw new System.ArgumentException("Port must have Single Capacity to add Children");
             Edge edge = port.connections.First();
             (edge.output.node as GraphNode).Node.AddChild((edge.input.node as GraphNode).Node);
+            UnityEditor.EditorUtility.SetDirty((edge.output.node as GraphNode).Node);
+            UnityEditor.EditorUtility.SetDirty((edge.input.node as GraphNode).Node);
         }
         /// <summary>
         /// Given the parent port of the child, remove the passed port's GraphNode's node as a child of the passed port's connection's GraphNodes's node.

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Master
   m_EditorClassIdentifier: 
   m_parent: {fileID: 0}
-  m_children: []
+  m_children:
+  - {fileID: 11400000, guid: 26ca1bba1c0b980478d04a4b505cf4f2, type: 2}
+  - {fileID: 11400000, guid: e3a04a1d8b0ba4c40a3a5f6a541750e1, type: 2}
   m_clips: []
   m_multiplier: 1
   m_muted: 0
