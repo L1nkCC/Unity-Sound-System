@@ -60,7 +60,7 @@ namespace CC.SoundSystem.Editor
             if (GUILayout.Button("Sort", GUILayout.Width(50))) OnSort();
             EditorGUILayout.EndHorizontal();
 
-            if (GUILayout.Button(new GUIContent("Update Enumerated Type"))) { DomainSaveUtilities.SaveAllDomains(); }// DomainEnumWriter.CreateDomainEnum(SelectedDomain); }
+            if (GUILayout.Button(new GUIContent("Update Enumerated Type"))) { DomainSaveUtilities.SaveAllDomains(); DomainEnumWriter.CreateDomainEnum(SelectedDomain); }
 
             GUILayout.Space(20);
 

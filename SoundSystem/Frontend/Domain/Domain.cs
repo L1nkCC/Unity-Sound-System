@@ -204,6 +204,7 @@ namespace CC.SoundSystem
         public static void DeleteNode(string domainName, Node node)
         {
             if (!GetNodeNames(domainName).Contains(node.name)) throw new System.ArgumentException("Domain " + domainName + " does not contain a node named " + node.name);
+            if (node.Parent != null) node.Parent.RemoveChild(node);
             string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
             AssetDatabase.DeleteAsset(nodeSavePath.GetRelativeUnityPath());
             AssetDatabase.SaveAssets();

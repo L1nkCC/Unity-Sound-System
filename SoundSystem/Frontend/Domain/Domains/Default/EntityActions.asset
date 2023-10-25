@@ -17,3 +17,4 @@ MonoBehaviour:
   m_clips: []
   m_multiplier: 1
   m_muted: 0
+  m_expandable: 1

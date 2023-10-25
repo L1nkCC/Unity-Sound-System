@@ -204,10 +204,25 @@ namespace CC.SoundSystem.Editor
         /// <param name="graphNode">GraphNode to delete</param>
         private void DeleteGraphNode(GraphNode graphNode)
         {
+            DisconnectAllConnections(graphNode);
             base.RemoveElement(graphNode);
             Domain.DeleteNode(m_selectedDomain, graphNode.Node);
         }
-
+        /// <summary>
+        /// Remove all port connections from graphnode
+        /// </summary>
+        /// <param name="graphNode">node to disconnect</param>
+        public void DisconnectAllConnections(GraphNode graphNode)
+        {
+            foreach (Edge edge in graphNode.ParentPort.connections)
+            {
+                RemoveElement(edge);
+            }
+            foreach(Edge edge in graphNode.ChildrenPort.connections)
+            {
+                RemoveElement(edge);
+            }
+        }
         /// <summary>
         /// Remove Element from Graph. Will safely remove GraphNodes and maintain their relationships
         /// </summary>
