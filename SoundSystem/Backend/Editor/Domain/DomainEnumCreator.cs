@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace CC.SoundSystem
+namespace CC.SoundSystem.Editor
 {
     public static class DomainEnumWriter
     {

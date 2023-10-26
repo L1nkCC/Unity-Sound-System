@@ -5,7 +5,7 @@ namespace CC.SoundSystem.Editor
 {
     /// Author: L1nkCC
     /// Created: 10/20/203
-    /// Last Edited: 10/22/2023
+    /// Last Edited: 10/26/2023
     /// 
     /// <summary>
     /// Window for Deletion of a Domain
@@ -63,6 +63,7 @@ namespace CC.SoundSystem.Editor
             if (Domain.GetAll().Length == 1) Domain.CreateDefaultDomain();
             OnDomainDeleted(domainTargetForDeletion);
             Domain.DeleteDomain(domainTargetForDeletion);
+            DomainEnumWriter.DeleteDomainEnum(domainTargetForDeletion);
             ShowNotification(new("Domain "+ domainTargetForDeletion + " Deleted Successfully!"));
         }
     }

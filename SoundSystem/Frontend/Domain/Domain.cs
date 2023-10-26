@@ -10,7 +10,7 @@ namespace CC.SoundSystem
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/25/2023
+    /// Last Edited: 10/26/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
@@ -53,6 +53,18 @@ namespace CC.SoundSystem
             }
             return nodes;
         }
+        /// <summary>
+        /// Get a node with the specified name from the domain
+        /// </summary>
+        /// <param name="domainName">The domain to search</param>
+        /// <param name="nodeName">The name to search for</param>
+        /// <returns>A node with the specified name in the domain or null if one does not exist</returns>
+        public static Node GetNode(string domainName, string nodeName)
+        {
+            Node[] query = GetNodes(domainName).Where(node => node.name.Equals(nodeName)).ToArray();
+            if (query.Length == 0) return null;
+            return query[0];
+        }
 
         /// <summary>
         /// Get root of domain
@@ -64,6 +76,15 @@ namespace CC.SoundSystem
             Node[] nodes = GetNodes(domainName);
             if (nodes.Length == 0) return null;
             return nodes.Where(node => node.IsRoot).ToArray()[0];
+        }
+        /// <summary>
+        /// Get all roots of domain
+        /// </summary>
+        /// <param name="domainName">Domain to search</param>
+        /// <returns>All roots that a domain has. This is better used for domains that are not well defined</returns>
+        public static Node[] GetRoots(string domainName)
+        {
+            return GetNodes(domainName).Where(node => node.IsRoot).ToArray();
         }
 
         /// <summary>
@@ -129,7 +150,6 @@ namespace CC.SoundSystem
                 Node node = Node.CreateInstance(nodeName);
                 AddNode(domainName, node);
             }
-            DomainEnumWriter.CreateDomainEnum(domainName);
         }
 
         /// <summary>
@@ -151,7 +171,6 @@ namespace CC.SoundSystem
                 AddNode(domainName, UI);
                 AddNode(domainName, PlayerActions);
                 AddNode(domainName, EntityActions);
-                DomainEnumWriter.CreateDomainEnum(domainName);
             }catch(InputValidationException e)
             {
                 throw new ApplicationException("Cannot Delete Default Domain if it is the only domain that exists. \n"+e.Message);
@@ -171,7 +190,6 @@ namespace CC.SoundSystem
                 CreateDefaultDomain();
             }
             AssetDatabase.DeleteAsset((path + domainName).GetRelativeUnityPath());
-            DomainEnumWriter.DeleteDomainEnum(domainName);
         }
 
         #endregion
@@ -201,6 +219,18 @@ namespace CC.SoundSystem
             string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
             AssetDatabase.DeleteAsset(nodeSavePath.GetRelativeUnityPath());
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Clear all Nodes out of a domain.
+        /// </summary>
+        /// <param name="domainName">Domain to clear</param>
+        public static void ClearDomain(string domainName)
+        {
+            foreach(Node node in GetNodes(domainName))
+            {
+                DeleteNode(domainName, node);
+            }
         }
         #endregion
 
