@@ -2,23 +2,55 @@ using UnityEditor;
 using System.IO;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 using CC.Core.Utilities.IO;
 using CC.Core.InputValidation;
+using System.Threading.Tasks;
 
 namespace CC.SoundSystem
 {
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/26/2023
+    /// Last Edited: 10/30/2023
     /// 
     /// <summary>
-    /// Class for accessing nodes by their folder or 'Domain' as this will be how the node recognize which tree they are a part of
+    /// Class for accessing nodes by their Domain
     /// </summary>
     public static class Domain
     {
-        static readonly string path = IO.Resources + Path.AltDirectorySeparatorChar + "Domains" + Path.AltDirectorySeparatorChar;
-        const string EXT = ".asset";
+
+        enum LoadStatus
+        {
+            NotStarted,
+            Started,
+            Finished,
+        }
+
+        private static LoadStatus m_loadStatus = LoadStatus.NotStarted;
+        private static Dictionary<string, HashSet<Node>> m_domains = null;
+
+        /// <summary>
+        /// Used to set the current domains. ONLY TO BE USED BY DOMAINSAVEUTILITIES
+        /// </summary>
+        /// <param name="newDomains">the new value for m_domains</param>
+        public static void SetDomains(Dictionary<string, HashSet<Node>> newDomains)
+        {
+            m_domains = newDomains;
+        }
+
+        /// <summary>
+        /// Assure that m_domains has been initialized with Saved Values
+        /// </summary>
+        public static void AssureLoad()
+        {
+            if (m_loadStatus == LoadStatus.NotStarted)//|| m_loadStatus.Status != TaskStatus.Running || m_loadStatus.Status != TaskStatus.RanToCompletion || m_loadStatus.Status != TaskStatus.WaitingToRun)
+            {
+                m_loadStatus = LoadStatus.Started;
+                DomainSaveUtilities.LoadAllDomains();
+                m_loadStatus = LoadStatus.Finished;
+            }
+        }
 
         #region Getters
         /// <summary>
@@ -27,31 +59,29 @@ namespace CC.SoundSystem
         /// <returns>All Domain names</returns>
         public static string[] GetAll()
         {
-            IO.AssureDirectory(path);
-            string[] paths = Directory.GetDirectories(path);
-            if (paths.Length == 0) 
+            AssureLoad();
+            UnityEngine.Debug.Log("LOADED IS COMKPLETE");
+            if (m_domains.Count == 0)
             {
                 CreateDefaultDomain();
-                paths = Directory.GetDirectories(path);
             }
-            for (int i = 0; i < paths.Length; i++)
-                paths[i] = Path.GetRelativePath(path,paths[i]);
-            return paths;
+            return m_domains.Keys.ToArray();
         }
+
         /// <summary>
         /// Returns all the nodes of a particular domain
         /// </summary>
         /// <param name="domainName">Domain to source</param>
-        /// <returns>All nodes in given domain</returns>
+        /// <returns>All nodes in given domain null if otherwise</returns>
         public static Node[] GetNodes(string domainName)
         {
-            string[] nodePaths =  Directory.GetFiles(path + domainName,"*"+EXT, SearchOption.TopDirectoryOnly);
-            Node[] nodes = new Node[nodePaths.Length];
-            for(int i= 0; i < nodePaths.Length; i++)
+            AssureLoad();
+            HashSet<Node> nodes;
+            if (m_domains.TryGetValue(domainName, out nodes))
             {
-                nodes[i] = (AssetDatabase.LoadAssetAtPath(nodePaths[i].GetRelativeUnityPath(), typeof(Node)) as Node);
+                return nodes.ToArray();
             }
-            return nodes;
+            return null;
         }
         /// <summary>
         /// Get a node with the specified name from the domain
@@ -61,6 +91,7 @@ namespace CC.SoundSystem
         /// <returns>A node with the specified name in the domain or null if one does not exist</returns>
         public static Node GetNode(string domainName, string nodeName)
         {
+            AssureLoad();
             Node[] query = GetNodes(domainName).Where(node => node.name.Equals(nodeName)).ToArray();
             if (query.Length == 0) return null;
             return query[0];
@@ -73,6 +104,7 @@ namespace CC.SoundSystem
         /// <returns>Root node for domain. If it is not well defined/has only one, then this will return the first one it finds and null if the domain is empty</returns>
         public static Node GetRoot(string domainName)
         {
+            AssureLoad();
             Node[] nodes = GetNodes(domainName);
             if (nodes.Length == 0) return null;
             return nodes.Where(node => node.IsRoot).ToArray()[0];
@@ -84,6 +116,7 @@ namespace CC.SoundSystem
         /// <returns>All roots that a domain has. This is better used for domains that are not well defined</returns>
         public static Node[] GetRoots(string domainName)
         {
+            AssureLoad();
             return GetNodes(domainName).Where(node => node.IsRoot).ToArray();
         }
 
@@ -94,13 +127,8 @@ namespace CC.SoundSystem
         /// <returns>Array of node names in domain</returns>
         public static string[] GetNodeNames(string domainName)
         {
-            string[] nodePaths = Directory.GetFiles(path + domainName, "*" + EXT, SearchOption.TopDirectoryOnly);
-            string[] nodeNames = new string[nodePaths.Length];
-            for(int i= 0; i < nodePaths.Length; i++)
-            {
-                nodeNames[i] = System.IO.Path.GetFileNameWithoutExtension(nodePaths[i]);
-            }
-            return nodeNames;
+            AssureLoad();
+            return GetNodes(domainName).Select(node => node.name).ToArray();
         }
 
         /// <summary>
@@ -110,9 +138,12 @@ namespace CC.SoundSystem
         /// <returns>Domain name</returns>
         public static string GetDomainOf(Node node)
         {
-            string assetPath = AssetDatabase.GetAssetPath(node);
-            string domain = Directory.GetParent(assetPath).FullName;
-            return Path.GetRelativePath(path, domain);
+            AssureLoad();
+            foreach (string domainName in GetAll())
+            {
+                if (m_domains.GetValueOrDefault(domainName).Contains(node)) return domainName;
+            }
+            return null;
         }
         #endregion
         #region Status
@@ -123,9 +154,10 @@ namespace CC.SoundSystem
         /// <returns>if domain contains only one root</returns>
         public static bool HasOneRoot(string domain)
         {
+            AssureLoad();
             int countOfRoots = 0;
             Node[] nodes = GetNodes(domain);
-            for(int i = 0; i < nodes.Length; i++)
+            for (int i = 0; i < nodes.Length; i++)
             {
                 if (nodes[i].IsRoot) countOfRoots++;
             }
@@ -140,16 +172,14 @@ namespace CC.SoundSystem
         /// <param name="nodeNames">Names of Nodes to be created</param>
         public static void CreateDomain(string domainName, string[] nodeNames)
         {
-            IO.AssureDirectory(path);
+            AssureLoad();
             ValidateInputs(domainName, nodeNames);
-            UnityEngine.Debug.Log(path + domainName);
-            System.IO.Directory.CreateDirectory(path.GetRelativeUnityPath() + domainName);
-            AssetDatabase.Refresh();
+            HashSet<Node> nodes = new();
             foreach (string nodeName in nodeNames)
             {
-                Node node = Node.CreateInstance(nodeName);
-                AddNode(domainName, node);
+                nodes.Add(Node.CreateInstance(nodeName));
             }
+            m_domains.Add(domainName, nodes);
         }
 
         /// <summary>
@@ -157,6 +187,7 @@ namespace CC.SoundSystem
         /// </summary>
         public static void CreateDefaultDomain()
         {
+            AssureLoad();
             try
             {
                 string domainName = "Default";
@@ -171,9 +202,10 @@ namespace CC.SoundSystem
                 AddNode(domainName, UI);
                 AddNode(domainName, PlayerActions);
                 AddNode(domainName, EntityActions);
-            }catch(InputValidationException e)
+            }
+            catch (InputValidationException e)
             {
-                throw new ApplicationException("Cannot Delete Default Domain if it is the only domain that exists. \n"+e.Message);
+                throw new ApplicationException("Cannot Delete Default Domain if it is the only domain that exists. \n" + e.Message);
             }
 
         }
@@ -185,11 +217,13 @@ namespace CC.SoundSystem
         /// <param name="domainName">Folder to Delete with path relative to the Domains Folder</param>
         public static void DeleteDomain(string domainName)
         {
-            if (Domain.GetAll().Length == 1 && File.Exists(path + domainName))
+            AssureLoad();
+            string[] domainNames = Domain.GetAll();
+            if (domainNames.Length == 1 && m_domains.ContainsKey(domainName))
             {
                 CreateDefaultDomain();
             }
-            AssetDatabase.DeleteAsset((path + domainName).GetRelativeUnityPath());
+            m_domains.Remove(domainName);
         }
 
         #endregion
@@ -202,10 +236,18 @@ namespace CC.SoundSystem
         /// <param name="node">The node to be saved</param>
         public static void AddNode(string domainName, Node node)
         {
+            AssureLoad();
             ValidateNodeName(domainName, node.name);
-            string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
-            AssetDatabase.CreateAsset(node, nodeSavePath.GetRelativeUnityPath());
-            AssetDatabase.SaveAssets();
+
+            HashSet<Node> nodesInDomain;
+            if (m_domains.TryGetValue(domainName, out nodesInDomain))
+            {
+                if (nodesInDomain.Add(node))
+                {
+                    m_domains.Remove(domainName);
+                    m_domains.Add(domainName, nodesInDomain);
+                }
+            }
         }
         /// <summary>
         /// Removes specified node from domain if it is in the domain. Throws an Error if it is not
@@ -214,11 +256,22 @@ namespace CC.SoundSystem
         /// <param name="node">Node to delete</param>
         public static void DeleteNode(string domainName, Node node)
         {
+            AssureLoad();
             if (!GetNodeNames(domainName).Contains(node.name)) throw new System.ArgumentException("Domain " + domainName + " does not contain a node named " + node.name);
-            if (node.Parent != null) node.Parent.RemoveChild(node);
-            string nodeSavePath = path + domainName + Path.AltDirectorySeparatorChar + node.name + EXT;
-            AssetDatabase.DeleteAsset(nodeSavePath.GetRelativeUnityPath());
-            AssetDatabase.SaveAssets();
+            HashSet<Node> nodesInDomain;
+            if (m_domains.TryGetValue(domainName, out nodesInDomain))
+            {
+                if (nodesInDomain.Remove(node))
+                {
+                    if (!node.IsRoot) node.Parent.RemoveChild(node);
+                    foreach (Node child in node.Children)
+                    {
+                        node.RemoveChild(child);
+                    }
+                    m_domains.Remove(domainName);
+                    m_domains.Add(domainName, nodesInDomain);
+                }
+            }
         }
 
         /// <summary>
@@ -227,10 +280,8 @@ namespace CC.SoundSystem
         /// <param name="domainName">Domain to clear</param>
         public static void ClearDomain(string domainName)
         {
-            foreach(Node node in GetNodes(domainName))
-            {
-                DeleteNode(domainName, node);
-            }
+            AssureLoad();
+            m_domains.Remove(domainName);
         }
         #endregion
 
@@ -242,11 +293,16 @@ namespace CC.SoundSystem
         /// <param name="nodeNames"></param>
         private static void ValidateInputs(string domainName, string[] nodeNames)
         {
+            AssureLoad();
             if (string.IsNullOrWhiteSpace(domainName)) throw new InputValidationException("Domain Name must not be white space or null");
-            if (Directory.Exists(path + domainName)) throw new InputValidationException("Domain "+ domainName + " Already Exists. Please Enter another name for the domain");
-            if (nodeNames.Distinct().Count() != nodeNames.Length) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
-            nodeNames.ValidateInput();
+            if (m_domains.ContainsKey(domainName)) throw new InputValidationException("Domain " + domainName + " Already Exists. Please Enter another name for the domain");
             domainName.ValidateInput();
+
+            if (nodeNames != null)
+            {
+                if (nodeNames.Distinct().Count() != nodeNames.Length) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
+                nodeNames.ValidateInput();
+            }
         }
 
         /// <summary>
@@ -256,23 +312,9 @@ namespace CC.SoundSystem
         /// <param name="nodeName">Node that may be added</param>
         public static void ValidateNodeName(string domainName, string nodeName)
         {
+            AssureLoad();
             if (GetNodeNames(domainName).Contains(nodeName)) throw new InputValidationException("Node Names are not distinct. Please Enter names that are unique");
             nodeName.ValidateInput();
-        }
-
-
-        /// <summary>
-        /// Provides the compile time location of this File so that a reference may be used to save the Enum files
-        /// </summary>
-        /// Helpful Link : https://stackoverflow.com/questions/47841441/how-do-i-get-the-path-to-the-current-c-sharp-source-code-file
-        private static class FileLocation
-        {
-            public static string Path => GetThisFilePath().Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
-            public static string Directory => System.IO.Path.GetDirectoryName(GetThisFilePath()).Replace('\\', System.IO.Path.AltDirectorySeparatorChar);
-            private static string GetThisFilePath([System.Runtime.CompilerServices.CallerFilePath] string path = null)
-            {
-                return path;
-            }
         }
         #endregion
     }

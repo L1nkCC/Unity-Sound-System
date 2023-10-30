@@ -40,13 +40,17 @@ namespace CC.SoundSystem
                 NodeUtilities.ForEachChildDepthFirst(Domain.GetRoots(domainName), (Node node, int level, int depth) => { domainSave.NodeSaves.Add(new NodeSave(node)); });
             }
 
-            public void Overwrite()
+/*            public void Overwrite()
             {
                 Domain.ClearDomain(Name);
                 for (int i = 0; i < NodeSaves.Count; i++)
                 {
                     NodeSaves[i].CreateInstance(Name);
                 }
+            }*/
+            public (string, HashSet<Node>) Convert()
+            {
+                return (Name, NodeSave.Convert(NodeSaves));
             }
 
         }
@@ -61,9 +65,23 @@ namespace CC.SoundSystem
                 ParentName = node.IsRoot ? "" : node.Parent.name;
             }
 
-            public void CreateInstance(string domainName)
+/*            public void CreateInstance(string domainName)
             {
                 Domain.AddNode(domainName, Node.CreateInstance(Name,Domain.GetNode(domainName, ParentName)));
+            }*/
+            public static HashSet<Node> Convert(List<NodeSave> nodeSaves )
+            {
+                HashSet<Node> nodes = new();
+                foreach(NodeSave nodeSave in nodeSaves)
+                {
+                    Node parent = null;
+                    foreach(Node possibleparent in nodes)
+                    {
+                        if (possibleparent.name == nodeSave.ParentName) parent = possibleparent;
+                    }
+                    nodes.Add(Node.CreateInstance(nodeSave.Name, parent));
+                }
+                return nodes;
             }
         }
         #endregion
@@ -108,15 +126,19 @@ namespace CC.SoundSystem
                         fileContents = file.ReadToEnd();
                     }
                     Settings settings = JsonUtility.FromJson<Settings>(fileContents);
+                    Dictionary<string, HashSet<Node>> loadedSettingsDictionary = new();
                     foreach (DomainSave domainSave in settings.DomainSaves)
                     {
-                        domainSave.Overwrite();
+                        (string domainName, HashSet<Node> nodes) = domainSave.Convert();
+                        loadedSettingsDictionary.Add(domainName, nodes);
                     }
+                    Domain.SetDomains(loadedSettingsDictionary);
                 }
             }
-            catch
+            catch ( System.Exception e)
             {
                 Debug.LogError("Loading of Sound Settings Failed");
+                Debug.LogError(e.ToString());
             }
         }
 
