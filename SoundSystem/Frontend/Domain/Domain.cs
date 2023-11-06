@@ -1,18 +1,15 @@
 using UnityEditor;
-using System.IO;
 using System.Linq;
 using System;
 using System.Collections.Generic;
-using CC.Core.Utilities.IO;
 using CC.Core.InputValidation;
-using System.Threading.Tasks;
 
 namespace CC.SoundSystem
 {
 
     /// Author: L1nkCC
     /// Created: 10/12/2023
-    /// Last Edited: 10/30/2023
+    /// Last Edited: 11/6/2023
     /// 
     /// <summary>
     /// Class for accessing nodes by their Domain
@@ -60,7 +57,6 @@ namespace CC.SoundSystem
         public static string[] GetAll()
         {
             AssureLoad();
-            UnityEngine.Debug.Log("LOADED IS COMKPLETE");
             if (m_domains.Count == 0)
             {
                 CreateDefaultDomain();

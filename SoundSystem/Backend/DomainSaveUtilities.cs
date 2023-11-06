@@ -1,36 +1,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using System.Collections;
 
 namespace CC.SoundSystem
 {
+    /// <summary>
+    /// Handle all Saving to disk operations for Domain
+    /// </summary>
     public static class DomainSaveUtilities
     {
         #region Save Structs
 
+        /// <summary>
+        /// Class to Wrap Domain Dictionary for saving
+        /// </summary>
         [System.Serializable]
         public class Settings
         {
             public DomainSave[] DomainSaves;
 
-            public Settings()
+            public static Settings GetDomainDictionaryWrapper()
             {
+                Settings settings = new();
                 string[] domainNames = Domain.GetAll();
-                DomainSaves = new DomainSave[domainNames.Length];
+                settings.DomainSaves = new DomainSave[domainNames.Length];
                 for(int i = 0; i < domainNames.Length; i++)
                 {
-                    DomainSaves[i] = new DomainSave(domainNames[i]);
+                    settings.DomainSaves[i] = new DomainSave(domainNames[i]);
                 }
+                return settings;
             }
         }
 
+        /// <summary>
+        /// Wrap entries into dictionary
+        /// </summary>
         [System.Serializable]
         public struct DomainSave
         {
             public string Name;
             public List<NodeSave> NodeSaves;
 
+            /// <summary>
+            /// Builds a wrapper for the past domain.
+            /// NOTE: This will use DepthFirst inorder to assure an order that parent nodes will always appear before children, necessary for node link list relationships
+            /// </summary>
+            /// <param name="domainName">Domain to convert</param>
             public DomainSave(string domainName)
             {
                 Name = domainName;
@@ -39,36 +54,39 @@ namespace CC.SoundSystem
                 //Assure that order will always have the parent earlier in the list
                 NodeUtilities.ForEachChildDepthFirst(Domain.GetRoots(domainName), (Node node, int level, int depth) => { domainSave.NodeSaves.Add(new NodeSave(node)); });
             }
-
-/*            public void Overwrite()
-            {
-                Domain.ClearDomain(Name);
-                for (int i = 0; i < NodeSaves.Count; i++)
-                {
-                    NodeSaves[i].CreateInstance(Name);
-                }
-            }*/
+            /// <summary>
+            /// Convert to a Dictionary entry
+            /// </summary>
+            /// <returns>Dictionary entry for domain</returns>
             public (string, HashSet<Node>) Convert()
             {
                 return (Name, NodeSave.Convert(NodeSaves));
             }
 
         }
+        /// <summary>
+        /// Wrap Node for dictionary. Necessary for maintaining link list relationships
+        /// </summary>
         [System.Serializable]
         public struct NodeSave
         {
             public string Name;
             public string ParentName;
+            /// <summary>
+            /// NodeSave Constructor. Build a wrapper
+            /// </summary>
+            /// <param name="node">Node to convert</param>
             public NodeSave (Node node)
             {
                 Name = node.name;
                 ParentName = node.IsRoot ? "" : node.Parent.name;
             }
-
-/*            public void CreateInstance(string domainName)
-            {
-                Domain.AddNode(domainName, Node.CreateInstance(Name,Domain.GetNode(domainName, ParentName)));
-            }*/
+            /// <summary>
+            /// Convert List to Node list. WIll fill link list relations
+            /// NOTE: Must have parents appear before children in list. Must have all nodes referenced in list
+            /// </summary>
+            /// <param name="nodeSaves">Domain of nodes to connect</param>
+            /// <returns>All converted nodes</returns>
             public static HashSet<Node> Convert(List<NodeSave> nodeSaves )
             {
                 HashSet<Node> nodes = new();
@@ -90,19 +108,17 @@ namespace CC.SoundSystem
         static readonly string fileName ="SoundSettings.json";
 
         #region Save/Write
+        /// <summary>
+        /// Save all information held in Domain dictionary
+        /// </summary>
         public static void SaveAllDomains()
-        {
-            Write(JsonUtility.ToJson(new Settings()));
-        }
-
-        private static void Write(string json)
         {
             try
             {
-                CC.Core.Utilities.IO.IO.AssureDirectory(filePath);
+                Core.Utilities.IO.IO.AssureDirectory(filePath);
                 using (StreamWriter file = File.CreateText(filePath + fileName))
                 {
-                    file.Write(json);
+                    file.Write(JsonUtility.ToJson(Settings.GetDomainDictionaryWrapper()));
                 }
             }
             catch
@@ -112,13 +128,16 @@ namespace CC.SoundSystem
         }
         #endregion
 
+        /// <summary>
+        /// Load all information held in Settings
+        /// </summary>
         [RuntimeInitializeOnLoadMethod]
         public static void LoadAllDomains()
         {
             try
             {
-                CC.Core.Utilities.IO.IO.AssureDirectory(filePath);
-                if (System.IO.File.Exists(filePath + fileName))
+                Core.Utilities.IO.IO.AssureDirectory(filePath);
+                if (File.Exists(filePath + fileName))
                 {
                     string fileContents;
                     using (StreamReader file = new StreamReader(filePath + fileName))
