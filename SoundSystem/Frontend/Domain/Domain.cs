@@ -65,6 +65,20 @@ namespace CC.SoundSystem
         }
 
         /// <summary>
+        /// Search through Domains and get the one that matches the passed name
+        /// </summary>
+        /// <param name="domainName">Domain to search for </param>
+        /// <returns>matching name or null</returns>
+        public static string GetDomain(string domainName)
+        {
+            string[] domains = GetAll();
+            string[] nameMatches = domains.Where(name => name.Equals(domainName)).ToArray();
+            if (nameMatches.Length == 0) return null;
+            UnityEngine.Debug.Log("nameMatches[0] = " + nameMatches[0]);
+            return nameMatches[0];
+        }
+
+        /// <summary>
         /// Returns all the nodes of a particular domain
         /// </summary>
         /// <param name="domainName">Domain to source</param>
